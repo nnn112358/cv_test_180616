@@ -120,6 +120,7 @@
     <button id="nudge">最初の衝突まで進める</button>
     <label class="check"><input type="checkbox" id="split" checked> 分裂する</label>
     <label class="check"><input type="checkbox" id="shrink"> 分裂で小さくなる（総面積一定）</label>
+    <label class="check"><input type="checkbox" id="vanish" checked> N 回ぶつかったら消える</label>
   </div>
 
   <div class="fields">
@@ -135,17 +136,23 @@
     <label class="field">最大個数 <span class="val" id="vMax">600</span>
       <input type="range" id="max" min="50" max="8000" step="50" value="600">
     </label>
+    <label class="field">消えるまでの衝突回数 N <span class="val" id="vLife">8 回</span>
+      <input type="range" id="life" min="1" max="40" step="1" value="8">
+    </label>
   </div>
 
   <div class="stats">
     <div>ボール <b id="sBalls">2</b></div>
     <div>衝突 <b id="sHits">0</b></div>
+    <div>消滅 <b id="sGone">0</b></div>
+    <div>最多 <b id="sPeak">2</b></div>
     <div>経過 <b id="sTime">0.0 s</b></div>
     <div>倍加 <b id="sGen">0.00</b> 世代</div>
   </div>
 </div>
 
-<footer>Space = 再生 / 一時停止、R = リセット。アリーナと配色は元動画の実測値（円半径 171px、ボール半径 7px、速度 約143px/秒）に合わせています。</footer>
+<footer>「N 回ぶつかったら消える」を有効にすると、各ボールは自分がぶつかった回数を数え、N 回目の衝突で消えます。回数は分裂した子に引き継がれ、残り回数が少ないボールほど薄く描かれます。<br>
+Space = 再生 / 一時停止、R = リセット。アリーナと配色は元動画の実測値（円半径 171px、ボール半径 7px、速度 約143px/秒）に合わせています。</footer>
 
 <script>
 (() => {
@@ -169,7 +176,11 @@
   const cv = document.getElementById("cv");
   const ctx = cv.getContext("2d");
 
-  const cfg = { rad: 7, speed: 1, spread: 26 * Math.PI / 180, maxBalls: 600, split: true, shrink: false };
+  const cfg = {
+    rad: 7, speed: 1, spread: 26 * Math.PI / 180, maxBalls: 600,
+    split: true, shrink: false,
+    vanish: true, life: 8          // N 回ぶつかったら消える
+  };
 
   // 表示半径。「小さくなる」ときは総面積が一定になるよう 1/√(N/2) で縮める。
   function radius() {
@@ -182,7 +193,8 @@
   const vx = new Float64Array(CAP), vy = new Float64Array(CAP);
   const imm = new Float32Array(CAP);
   const col = new Uint8Array(CAP);
-  let n = 0, time = 0, hits = 0;
+  const bump = new Uint16Array(CAP);   // そのボールがこれまでにぶつかった回数
+  let n = 0, time = 0, hits = 0, gone = 0, peak = 2;
 
   let running = true, acc = 0, lastFrame = 0, dpr = 1;
 
@@ -190,7 +202,7 @@
     px[i] = x; py[i] = y;
     vx[i] = Math.cos(angle) * SPEED;
     vy[i] = Math.sin(angle) * SPEED;
-    col[i] = c; imm[i] = immune;
+    col[i] = c; imm[i] = immune; bump[i] = 0;
   }
 
   function reset() {
@@ -198,7 +210,7 @@
     n = 0;
     put(n++, CX - d, CY - d * 0.1, Math.random() * TAU, 0, 0);
     put(n++, CX + d * 0.2, CY + d * 0.7, Math.random() * TAU, 1, 0);
-    time = 0; hits = 0; acc = 0;
+    time = 0; hits = 0; gone = 0; peak = n; acc = 0;
   }
 
   // ---- 空間グリッド（毎ステップ計数ソートで作り直す）--------------------
@@ -286,6 +298,23 @@
   }
 
   const used = new Uint8Array(CAP);
+  const dead = new Uint8Array(CAP);
+  let deaths = 0;
+
+  // 衝突した 1 個の後始末。ぶつかった回数を 1 増やし、N 回に達したら消す。
+  // 消えないなら（分裂が有効なら）2 個に分ける。回数は子に引き継ぐ。
+  // 何かが起きた（消えた / 分裂した）ときだけ true を返す。
+  function resolve(k, rad) {
+    const h = bump[k] + 1;
+    if (cfg.vanish && h >= cfg.life) { dead[k] = 1; deaths++; gone++; return true; }
+    bump[k] = h;
+    if (!cfg.split || n + 1 > cfg.maxBalls) return false;
+    splitInto(k, k, n, rad);
+    bump[n] = h;
+    dead[n] = 0;
+    n++;
+    return true;
+  }
 
   function step(dt) {
     const rad = radius(), lim = R - rad, d2 = (2 * rad) * (2 * rad);
@@ -316,6 +345,8 @@
 
     const n0 = n;
     used.fill(0, 0, n0);
+    dead.fill(0, 0, n0);
+    deaths = 0;
 
     for (let i = 0; i < n0; i++) {
       if (used[i]) continue;
@@ -334,20 +365,35 @@
             if (dx * dx + dy * dy > d2) continue;
 
             used[i] = used[j] = 1;
-            const canSplit = cfg.split && imm[i] <= 0 && imm[j] <= 0 && n + 2 <= cfg.maxBalls;
+            // 生まれた直後（無敵時間中）の接触は衝突として数えない
+            const live = imm[i] <= 0 && imm[j] <= 0;
             bounce(i, j, rad);
-            if (canSplit) {
-              hits++;
-              // 2 個 → 4 個。もとのスロットを再利用し、残り 2 個を末尾に足す。
-              splitInto(i, i, n, rad);
-              splitInto(j, j, n + 1, rad);
-              n += 2;
+            if (live) {
+              // 満杯で何も起きなかった接触は衝突として数えない
+              const a = resolve(i, rad), b2 = resolve(j, rad);
+              if (a || b2) hits++;
             }
             break;
           }
         }
       }
     }
+
+    // 消えたぶんを詰める
+    if (deaths) {
+      let w = 0;
+      for (let r = 0; r < n; r++) {
+        if (dead[r]) continue;
+        if (w !== r) {
+          px[w] = px[r]; py[w] = py[r];
+          vx[w] = vx[r]; vy[w] = vy[r];
+          imm[w] = imm[r]; col[w] = col[r]; bump[w] = bump[r];
+        }
+        w++;
+      }
+      n = w;
+    }
+    if (n > peak) peak = n;
   }
 
   // ---- 描画 ------------------------------------------------------------
@@ -362,31 +408,48 @@
     ctx.arc(CX, CY, R, 0, TAU);
     ctx.stroke();
 
+    // 消えるまでの残り回数を濃さで見せる。色 × 濃さのグループごとにまとめて描く。
     const rad = radius();
+    const fading = cfg.vanish && cfg.life > 1;
+    const LEVELS = fading ? 4 : 1;
     for (let c = 0; c < PALETTE.length; c++) {
-      let any = false;
-      ctx.beginPath();
-      for (let i = 0; i < n; i++) {
-        if (col[i] !== c) continue;
-        any = true;
-        ctx.moveTo(px[i] + rad, py[i]);
-        ctx.arc(px[i], py[i], rad, 0, TAU);
-      }
-      if (!any) continue;
-      ctx.fillStyle = PALETTE[c].fill;
-      ctx.fill();
-      if (rad >= 3) {
-        ctx.strokeStyle = PALETTE[c].line;
-        ctx.lineWidth = 1.4;
-        ctx.stroke();
+      for (let b = 0; b < LEVELS; b++) {
+        let any = false;
+        ctx.beginPath();
+        for (let i = 0; i < n; i++) {
+          if (col[i] !== c) continue;
+          if (fading) {
+            let lv = (bump[i] * LEVELS / cfg.life) | 0;
+            if (lv > LEVELS - 1) lv = LEVELS - 1;
+            if (lv !== b) continue;
+          }
+          any = true;
+          ctx.moveTo(px[i] + rad, py[i]);
+          ctx.arc(px[i], py[i], rad, 0, TAU);
+        }
+        if (!any) continue;
+        ctx.globalAlpha = fading ? 1 - 0.6 * (b / (LEVELS - 1)) : 1;
+        ctx.fillStyle = PALETTE[c].fill;
+        ctx.fill();
+        if (rad >= 3) {
+          ctx.strokeStyle = PALETTE[c].line;
+          ctx.lineWidth = 1.4;
+          ctx.stroke();
+        }
       }
     }
+    ctx.globalAlpha = 1;
 
     ctx.fillStyle = "#222";
     ctx.font = '27px "Helvetica Neue", Arial, sans-serif';
     ctx.textAlign = "right";
     ctx.textBaseline = "alphabetic";
     ctx.fillText("ball : " + n, 636, 64);
+    if (n === 0) {
+      ctx.fillStyle = "#999";
+      ctx.font = '16px "Helvetica Neue", Arial, sans-serif';
+      ctx.fillText("全部消えました（R でリセット）", 636, 88);
+    }
   }
 
   // ---- メインループ ----------------------------------------------------
@@ -412,13 +475,16 @@
 
   // ---- UI --------------------------------------------------------------
   const $ = id => document.getElementById(id);
-  const sBalls = $("sBalls"), sHits = $("sHits"), sTime = $("sTime"), sGen = $("sGen");
+  const sBalls = $("sBalls"), sHits = $("sHits"), sTime = $("sTime"),
+        sGen = $("sGen"), sGone = $("sGone"), sPeak = $("sPeak");
 
   function updateStats() {
     sBalls.textContent = n;
     sHits.textContent = hits;
+    sGone.textContent = gone;
+    sPeak.textContent = peak;
     sTime.textContent = time.toFixed(1) + " s";
-    sGen.textContent = Math.log2(n / 2).toFixed(2);
+    sGen.textContent = n > 0 ? Math.log2(n / 2).toFixed(2) : "—";
   }
 
   $("play").addEventListener("click", () => {
@@ -433,6 +499,7 @@
     const rad = radius();
     for (let i = 0; i < n; i++) clampInside(i, rad);
   });
+  $("vanish").addEventListener("change", e => { cfg.vanish = e.target.checked; });
 
   // 最初の衝突が起きるまで物理だけを早送りする（元動画では 30 秒以上かかる）
   $("nudge").addEventListener("click", () => {
@@ -457,6 +524,7 @@
   bindRange("speed", "vSpeed", v => v.toFixed(1) + "×", v => { cfg.speed = v; });
   bindRange("spread", "vSpread", v => v + "°", v => { cfg.spread = v * Math.PI / 180; });
   bindRange("max", "vMax", v => String(v), v => { cfg.maxBalls = Math.min(v, CAP - 4); });
+  bindRange("life", "vLife", v => v + " 回", v => { cfg.life = v; });
   bindRange("radius", "vRadius", v => v + " px", v => {
     cfg.rad = v;
     const rad = radius();
