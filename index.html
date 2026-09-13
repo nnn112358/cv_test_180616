@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ぶつかるたびに分裂するボール</title>
+<style>
+  :root {
+    --bg: #f2f0eb;
+    --fg: #1c1c1e;
+    --muted: #6b6b70;
+    --panel: #ffffff;
+    --line: #dcd8d0;
+    --accent: #2f7f9e;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #16171a;
+      --fg: #e9e9ec;
+      --muted: #9a9aa2;
+      --panel: #212328;
+      --line: #34363c;
+      --accent: #62deff;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 24px 16px 48px;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
+    line-height: 1.6;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+  }
+  header { max-width: 700px; width: 100%; }
+  h1 { font-size: 19px; margin: 0 0 4px; letter-spacing: .01em; }
+  header p { margin: 0; color: var(--muted); font-size: 13px; }
+  header a { color: var(--accent); }
+
+  .stage {
+    width: 100%;
+    max-width: 700px;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+    line-height: 0;
+  }
+  canvas { width: 100%; height: auto; display: block; }
+
+  .panel {
+    width: 100%;
+    max-width: 700px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  button {
+    font: inherit;
+    font-size: 13px;
+    padding: 7px 14px;
+    border-radius: 7px;
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--fg);
+    cursor: pointer;
+  }
+  button:hover { border-color: var(--accent); color: var(--accent); }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button.primary:hover { opacity: .88; color: #fff; }
+
+  .fields {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 12px 20px;
+  }
+  label.field { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--muted); }
+  label.field .val { color: var(--fg); font-variant-numeric: tabular-nums; }
+  input[type=range] { width: 100%; accent-color: var(--accent); }
+  label.check { display: flex; align-items: center; gap: 7px; font-size: 13px; color: var(--fg); }
+
+  .stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 26px;
+    font-size: 13px;
+    border-top: 1px solid var(--line);
+    padding-top: 12px;
+  }
+  .stats div { color: var(--muted); }
+  .stats b { color: var(--fg); font-variant-numeric: tabular-nums; font-weight: 600; }
+  footer { max-width: 700px; width: 100%; font-size: 12px; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>ぶつかるたびに分裂するボール</h1>
+  <p>ボール同士が衝突するたび、それぞれが 2 個に分裂します。数はやがて指数関数的に増えます。
+     <a href="https://x.com/jagarikin/status/2097409553281499469" target="_blank" rel="noopener">元ネタ（@jagarikin）</a></p>
+</header>
+
+<div class="stage">
+  <canvas id="cv" width="700" height="488"></canvas>
+</div>
+
+<div class="panel">
+  <div class="row">
+    <button id="play" class="primary">一時停止</button>
+    <button id="reset">リセット</button>
+    <button id="nudge">最初の衝突まで進める</button>
+    <label class="check"><input type="checkbox" id="split" checked> 分裂する</label>
+    <label class="check"><input type="checkbox" id="shrink"> 分裂で小さくなる（総面積一定）</label>
+    <label class="check"><input type="checkbox" id="vanish" checked> N 回ぶつかったら消える</label>
+  </div>
+
+  <div class="fields">
+    <label class="field">速度 <span class="val" id="vSpeed">1.0×</span>
+      <input type="range" id="speed" min="0.25" max="12" step="0.25" value="1">
+    </label>
+    <label class="field">ボール半径 <span class="val" id="vRadius">7 px</span>
+      <input type="range" id="radius" min="2" max="16" step="1" value="7">
+    </label>
+    <label class="field">分裂の開き角 <span class="val" id="vSpread">26°</span>
+      <input type="range" id="spread" min="5" max="80" step="1" value="26">
+    </label>
+    <label class="field">最大個数 <span class="val" id="vMax">600</span>
+      <input type="range" id="max" min="50" max="8000" step="50" value="600">
+    </label>
+    <label class="field">消えるまでの衝突回数 N <span class="val" id="vLife">8 回</span>
+      <input type="range" id="life" min="1" max="40" step="1" value="8">
+    </label>
+  </div>
+
+  <div class="stats">
+    <div>ボール <b id="sBalls">2</b></div>
+    <div>衝突 <b id="sHits">0</b></div>
+    <div>消滅 <b id="sGone">0</b></div>
+    <div>最多 <b id="sPeak">2</b></div>
+    <div>経過 <b id="sTime">0.0 s</b></div>
+    <div>倍加 <b id="sGen">0.00</b> 世代</div>
+  </div>
+</div>
+
+<footer>「N 回ぶつかったら消える」を有効にすると、各ボールは自分がぶつかった回数を数え、N 回目の衝突で消えます。回数は分裂した子に引き継がれ、残り回数が少ないボールほど薄く描かれます。<br>
+Space = 再生 / 一時停止、R = リセット。アリーナと配色は元動画の実測値（円半径 171px、ボール半径 7px、速度 約143px/秒）に合わせています。</footer>
+
+<script>
+(() => {
+  "use strict";
+
+  // ---- 元動画から実測した値 --------------------------------------------
+  const VW = 700, VH = 488;      // 描画サイズ
+  const CX = 352, CY = 241;      // 円形アリーナの中心
+  const R  = 171;                // アリーナ半径
+  const SPEED = 143;             // ボールの速さ（px/秒）
+  const PALETTE = [
+    { fill: "#62deff", line: "#1b3e47" },   // 水色
+    { fill: "#ffdd93", line: "#473e29" }    // 橙
+  ];
+
+  const TAU = Math.PI * 2;
+  const CAP = 16384;             // 確保するスロット数（最大個数の上限より少し多め）
+  const IMMUNE = 0.14;           // 分裂直後に再分裂しない時間（秒）
+  const FIXED = 1 / 120;         // 物理の固定ステップ（秒）
+
+  const cv = document.getElementById("cv");
+  const ctx = cv.getContext("2d");
+
+  const cfg = {
+    rad: 7, speed: 1, spread: 26 * Math.PI / 180, maxBalls: 600,
+    split: true, shrink: false,
+    vanish: true, life: 8          // N 回ぶつかったら消える
+  };
+
+  // 表示半径。「小さくなる」ときは総面積が一定になるよう 1/√(N/2) で縮める。
+  function radius() {
+    if (!cfg.shrink || n <= 2) return cfg.rad;
+    return Math.max(0.8, cfg.rad * Math.sqrt(2 / n));
+  }
+
+  // ---- 状態（Structure of Arrays）--------------------------------------
+  const px = new Float64Array(CAP), py = new Float64Array(CAP);
+  const vx = new Float64Array(CAP), vy = new Float64Array(CAP);
+  const imm = new Float32Array(CAP);
+  const col = new Uint8Array(CAP);
+  const bump = new Uint16Array(CAP);   // そのボールがこれまでにぶつかった回数
+  let n = 0, time = 0, hits = 0, gone = 0, peak = 2;
+
+  let running = true, acc = 0, lastFrame = 0, dpr = 1;
+
+  function put(i, x, y, angle, c, immune) {
+    px[i] = x; py[i] = y;
+    vx[i] = Math.cos(angle) * SPEED;
+    vy[i] = Math.sin(angle) * SPEED;
+    col[i] = c; imm[i] = immune; bump[i] = 0;
+  }
+
+  function reset() {
+    const d = R * 0.55;
+    n = 0;
+    put(n++, CX - d, CY - d * 0.1, Math.random() * TAU, 0, 0);
+    put(n++, CX + d * 0.2, CY + d * 0.7, Math.random() * TAU, 1, 0);
+    time = 0; hits = 0; gone = 0; peak = n; acc = 0;
+  }
+
+  // ---- 空間グリッド（毎ステップ計数ソートで作り直す）--------------------
+  let gw = 0, gh = 0, gcell = 0, gx0 = 0, gy0 = 0;
+  let start = new Int32Array(0), items = new Int32Array(CAP), counts = new Int32Array(0);
+
+  function ensureGrid(rad) {
+    const cell = Math.max(4, Math.ceil(rad * 2));
+    if (cell === gcell) return;
+    gcell = cell;
+    gx0 = CX - R - cell;
+    gy0 = CY - R - cell;
+    gw = Math.ceil(2 * R / cell) + 3;
+    gh = gw;
+    start = new Int32Array(gw * gh + 1);
+    counts = new Int32Array(gw * gh);
+  }
+
+  function cellIndex(i) {
+    let cx = (px[i] - gx0) / gcell | 0;
+    let cy = (py[i] - gy0) / gcell | 0;
+    if (cx < 0) cx = 0; else if (cx >= gw) cx = gw - 1;
+    if (cy < 0) cy = 0; else if (cy >= gh) cy = gh - 1;
+    return cy * gw + cx;
+  }
+
+  function buildGrid() {
+    counts.fill(0);
+    for (let i = 0; i < n; i++) counts[cellIndex(i)]++;
+    let acc2 = 0;
+    for (let c = 0; c < counts.length; c++) { start[c] = acc2; acc2 += counts[c]; counts[c] = start[c]; }
+    start[counts.length] = acc2;
+    for (let i = 0; i < n; i++) items[counts[cellIndex(i)]++] = i;
+  }
+
+  // ---- 物理 ------------------------------------------------------------
+  function clampInside(i, rad) {
+    const dx = px[i] - CX, dy = py[i] - CY;
+    const d = Math.sqrt(dx * dx + dy * dy);
+    const lim = Math.max(0, R - rad);
+    if (d > lim) {
+      const s = lim / (d || 1);
+      px[i] = CX + dx * s;
+      py[i] = CY + dy * s;
+    }
+  }
+
+  // 等質量の弾性衝突（法線方向の速度成分を交換し、めり込みを解消する）
+  function bounce(i, j, rad) {
+    let dx = px[j] - px[i], dy = py[j] - py[i];
+    let d = Math.sqrt(dx * dx + dy * dy);
+    if (d < 1e-6) { dx = 1; dy = 0; d = 1e-6; }
+    const nx = dx / d, ny = dy / d;
+    const p = (vx[i] - vx[j]) * nx + (vy[i] - vy[j]) * ny;
+    if (p > 0) {
+      vx[i] -= p * nx; vy[i] -= p * ny;
+      vx[j] += p * nx; vy[j] += p * ny;
+    }
+    const ov = (2 * rad - d) / 2;
+    if (ov > 0) {
+      px[i] -= nx * ov; py[i] -= ny * ov;
+      px[j] += nx * ov; py[j] += ny * ov;
+    }
+  }
+
+  // src のボールを 2 個に分ける。片方は dstA、もう片方は dstB のスロットへ。
+  // 進行方向から ±spread だけ振り、互いに離れる向きへずらして即再衝突を避ける。
+  function splitInto(src, dstA, dstB, rad) {
+    const a0 = Math.atan2(vy[src], vx[src]);
+    const x = px[src], y = py[src], c = col[src];
+    const dst = [dstA, dstB];
+    for (let k = 0; k < 2; k++) {
+      const s = k === 0 ? -1 : 1;
+      const a = a0 + s * cfg.spread;
+      const ux = Math.cos(a), uy = Math.sin(a);
+      const i = dst[k];
+      px[i] = x - uy * s * rad * 1.15;
+      py[i] = y + ux * s * rad * 1.15;
+      vx[i] = ux * SPEED;
+      vy[i] = uy * SPEED;
+      col[i] = c;
+      imm[i] = IMMUNE;
+      clampInside(i, rad);
+    }
+  }
+
+  const used = new Uint8Array(CAP);
+  const dead = new Uint8Array(CAP);
+  let deaths = 0;
+
+  // 衝突した 1 個の後始末。ぶつかった回数を 1 増やし、N 回に達したら消す。
+  // 消えないなら（分裂が有効なら）2 個に分ける。回数は子に引き継ぐ。
+  // 何かが起きた（消えた / 分裂した）ときだけ true を返す。
+  function resolve(k, rad) {
+    const h = bump[k] + 1;
+    if (cfg.vanish && h >= cfg.life) { dead[k] = 1; deaths++; gone++; return true; }
+    bump[k] = h;
+    if (!cfg.split || n + 1 > cfg.maxBalls) return false;
+    splitInto(k, k, n, rad);
+    bump[n] = h;
+    dead[n] = 0;
+    n++;
+    return true;
+  }
+
+  function step(dt) {
+    const rad = radius(), lim = R - rad, d2 = (2 * rad) * (2 * rad);
+
+    for (let i = 0; i < n; i++) {
+      // 速さは常に一定に保つ（密集してもエネルギーが暴走しない）
+      const sp = Math.sqrt(vx[i] * vx[i] + vy[i] * vy[i]);
+      if (sp > 1e-9) { const k = SPEED / sp; vx[i] *= k; vy[i] *= k; }
+
+      px[i] += vx[i] * dt;
+      py[i] += vy[i] * dt;
+      if (imm[i] > 0) imm[i] -= dt;
+
+      // 壁（円）で完全反射
+      const dx = px[i] - CX, dy = py[i] - CY;
+      const d = Math.sqrt(dx * dx + dy * dy);
+      if (d > lim) {
+        const nx = dx / (d || 1), ny = dy / (d || 1);
+        const vn = vx[i] * nx + vy[i] * ny;
+        if (vn > 0) { vx[i] -= 2 * vn * nx; vy[i] -= 2 * vn * ny; }
+        px[i] = CX + nx * lim;
+        py[i] = CY + ny * lim;
+      }
+    }
+
+    ensureGrid(rad);
+    buildGrid();
+
+    const n0 = n;
+    used.fill(0, 0, n0);
+    dead.fill(0, 0, n0);
+    deaths = 0;
+
+    for (let i = 0; i < n0; i++) {
+      if (used[i]) continue;
+      const ci = cellIndex(i);
+      const cx = ci % gw, cy = (ci / gw) | 0;
+      const x0 = Math.max(0, cx - 1), x1 = Math.min(gw - 1, cx + 1);
+      const y0 = Math.max(0, cy - 1), y1 = Math.min(gh - 1, cy + 1);
+
+      for (let yy = y0; yy <= y1 && !used[i]; yy++) {
+        for (let xx = x0; xx <= x1 && !used[i]; xx++) {
+          const c = yy * gw + xx;
+          for (let k = start[c], e = start[c + 1]; k < e; k++) {
+            const j = items[k];
+            if (j <= i || used[j]) continue;
+            const dx = px[j] - px[i], dy = py[j] - py[i];
+            if (dx * dx + dy * dy > d2) continue;
+
+            used[i] = used[j] = 1;
+            // 生まれた直後（無敵時間中）の接触は衝突として数えない
+            const live = imm[i] <= 0 && imm[j] <= 0;
+            bounce(i, j, rad);
+            if (live) {
+              // 満杯で何も起きなかった接触は衝突として数えない
+              const a = resolve(i, rad), b2 = resolve(j, rad);
+              if (a || b2) hits++;
+            }
+            break;
+          }
+        }
+      }
+    }
+
+    // 消えたぶんを詰める
+    if (deaths) {
+      let w = 0;
+      for (let r = 0; r < n; r++) {
+        if (dead[r]) continue;
+        if (w !== r) {
+          px[w] = px[r]; py[w] = py[r];
+          vx[w] = vx[r]; vy[w] = vy[r];
+          imm[w] = imm[r]; col[w] = col[r]; bump[w] = bump[r];
+        }
+        w++;
+      }
+      n = w;
+    }
+    if (n > peak) peak = n;
+  }
+
+  // ---- 描画 ------------------------------------------------------------
+  function draw() {
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, VW, VH);
+
+    ctx.strokeStyle = "#3a3a3a";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(CX, CY, R, 0, TAU);
+    ctx.stroke();
+
+    // 消えるまでの残り回数を濃さで見せる。色 × 濃さのグループごとにまとめて描く。
+    const rad = radius();
+    const fading = cfg.vanish && cfg.life > 1;
+    const LEVELS = fading ? 4 : 1;
+    for (let c = 0; c < PALETTE.length; c++) {
+      for (let b = 0; b < LEVELS; b++) {
+        let any = false;
+        ctx.beginPath();
+        for (let i = 0; i < n; i++) {
+          if (col[i] !== c) continue;
+          if (fading) {
+            let lv = (bump[i] * LEVELS / cfg.life) | 0;
+            if (lv > LEVELS - 1) lv = LEVELS - 1;
+            if (lv !== b) continue;
+          }
+          any = true;
+          ctx.moveTo(px[i] + rad, py[i]);
+          ctx.arc(px[i], py[i], rad, 0, TAU);
+        }
+        if (!any) continue;
+        ctx.globalAlpha = fading ? 1 - 0.6 * (b / (LEVELS - 1)) : 1;
+        ctx.fillStyle = PALETTE[c].fill;
+        ctx.fill();
+        if (rad >= 3) {
+          ctx.strokeStyle = PALETTE[c].line;
+          ctx.lineWidth = 1.4;
+          ctx.stroke();
+        }
+      }
+    }
+    ctx.globalAlpha = 1;
+
+    ctx.fillStyle = "#222";
+    ctx.font = '27px "Helvetica Neue", Arial, sans-serif';
+    ctx.textAlign = "right";
+    ctx.textBaseline = "alphabetic";
+    ctx.fillText("ball : " + n, 636, 64);
+    if (n === 0) {
+      ctx.fillStyle = "#999";
+      ctx.font = '16px "Helvetica Neue", Arial, sans-serif';
+      ctx.fillText("全部消えました（R でリセット）", 636, 88);
+    }
+  }
+
+  // ---- メインループ ----------------------------------------------------
+  function frame(now) {
+    requestAnimationFrame(frame);
+    if (!lastFrame) lastFrame = now;
+    let dt = (now - lastFrame) / 1000;
+    lastFrame = now;
+    if (dt > 0.1) dt = 0.1;                  // タブ復帰時のまとめ実行を防ぐ
+
+    if (running) {
+      acc += dt * cfg.speed;
+      // 個数が増えるほど 1 フレームあたりの物理ステップ数を絞り、
+      // フレームレートではなく体感速度のほうを落とす
+      const budget = Math.max(2, Math.min(120, Math.round(60000 / Math.max(1, n))));
+      let guard = 0;
+      while (acc >= FIXED && guard < budget) { step(FIXED); time += FIXED; acc -= FIXED; guard++; }
+      if (guard >= budget) acc = 0;
+    }
+    draw();
+    updateStats();
+  }
+
+  // ---- UI --------------------------------------------------------------
+  const $ = id => document.getElementById(id);
+  const sBalls = $("sBalls"), sHits = $("sHits"), sTime = $("sTime"),
+        sGen = $("sGen"), sGone = $("sGone"), sPeak = $("sPeak");
+
+  function updateStats() {
+    sBalls.textContent = n;
+    sHits.textContent = hits;
+    sGone.textContent = gone;
+    sPeak.textContent = peak;
+    sTime.textContent = time.toFixed(1) + " s";
+    sGen.textContent = n > 0 ? Math.log2(n / 2).toFixed(2) : "—";
+  }
+
+  $("play").addEventListener("click", () => {
+    running = !running;
+    $("play").textContent = running ? "一時停止" : "再生";
+    lastFrame = 0;
+  });
+  $("reset").addEventListener("click", reset);
+  $("split").addEventListener("change", e => { cfg.split = e.target.checked; });
+  $("shrink").addEventListener("change", e => {
+    cfg.shrink = e.target.checked;
+    const rad = radius();
+    for (let i = 0; i < n; i++) clampInside(i, rad);
+  });
+  $("vanish").addEventListener("change", e => { cfg.vanish = e.target.checked; });
+
+  // 最初の衝突が起きるまで物理だけを早送りする（元動画では 30 秒以上かかる）
+  $("nudge").addEventListener("click", () => {
+    if (!cfg.split) return;
+    const start0 = n;
+    for (let i = 0; i < 60000 && n === start0; i++) { step(FIXED); time += FIXED; }
+    draw();
+    updateStats();
+  });
+
+  function bindRange(id, valId, fmt, apply) {
+    const el = $(id), out = $(valId);
+    const sync = () => {
+      const v = parseFloat(el.value);
+      out.textContent = fmt(v);
+      apply(v);
+    };
+    el.addEventListener("input", sync);
+    sync();
+  }
+
+  bindRange("speed", "vSpeed", v => v.toFixed(1) + "×", v => { cfg.speed = v; });
+  bindRange("spread", "vSpread", v => v + "°", v => { cfg.spread = v * Math.PI / 180; });
+  bindRange("max", "vMax", v => String(v), v => { cfg.maxBalls = Math.min(v, CAP - 4); });
+  bindRange("life", "vLife", v => v + " 回", v => { cfg.life = v; });
+  bindRange("radius", "vRadius", v => v + " px", v => {
+    cfg.rad = v;
+    const rad = radius();
+    for (let i = 0; i < n; i++) clampInside(i, rad);
+  });
+
+  addEventListener("keydown", e => {
+    if (e.code === "Space") { e.preventDefault(); $("play").click(); }
+    else if (e.key === "r" || e.key === "R") reset();
+  });
+
+  // ---- 高解像度ディスプレイ対応 ----------------------------------------
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    cv.width = VW * dpr;
+    cv.height = VH * dpr;
+    draw();
+  }
+  addEventListener("resize", resize);
+
+  reset();
+  ensureGrid(radius());
+  resize();
+  requestAnimationFrame(frame);
+})();
+</script>
+
+</body>
+</html>
