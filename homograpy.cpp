@@ -1,4 +1,4 @@
-// g++ homograpy.cpp -I/usr/include/opencv2 -I/usr/include/opencv -L/usr/local/lib -lopencv_core -lopencv_highgui -lopencv_calib3d -lopencv_imgproc
+// g++ homograpy.cpp -o homography $(pkg-config --cflags --libs opencv4)
 
 #include <iostream>
 #include <opencv2/opencv.hpp>
@@ -10,7 +10,7 @@
 
 using namespace std;
 
-double stof(std::string str){
+double toDouble(std::string str){
     double ret;
     std::stringstream ss;
     ss << str;
@@ -45,14 +45,14 @@ int main(){
         vector<string> strvec = split(line, ',');
 	if(j==0){
         for (int i = 0; i < 4; i++)        {
-            xin[i] = stof(strvec.at(2 * i));
-            yin[i] = stof(strvec.at(2 * i + 1));
+            xin[i] = toDouble(strvec.at(2 * i));
+            yin[i] = toDouble(strvec.at(2 * i + 1));
             cout <<"in_"<< xin[i] << "," << yin[i] << "\t";
         }}
         if(j==1){
         for (int i = 0; i < 4; i++)        {
-            xout[i] = stof(strvec.at(2 * i));
-            yout[i] = stof(strvec.at(2 * i + 1));
+            xout[i] = toDouble(strvec.at(2 * i));
+            yout[i] = toDouble(strvec.at(2 * i + 1));
             cout <<"out_"<< xout[i] << "," << yout[i] << "\t";
         }}
        
@@ -107,8 +107,8 @@ int main(){
 
     while (getline(ifs2, line)){
         vector<string> strvec = split(line, ',');
-          x_test.push_back(stof(strvec.at(0)));
-          y_test.push_back(stof(strvec.at(1)));
+          x_test.push_back(toDouble(strvec.at(0)));
+          y_test.push_back(toDouble(strvec.at(1)));
     }
 
 	for(int i=0;i<x_test.size();i++){
