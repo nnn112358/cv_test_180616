@@ -5,6 +5,8 @@
 
 凡例: ⬜ 未作成 / ✅ 作成済み
 
+**PDF 版:** 全問まとめ [`llm_calc_exercises_all.pdf`](llm_calc_exercises_all.pdf) / 1 問ずつ [`pdf/`](pdf/)
+
 全 24 章、50 問
 
 ![目次](svg/00_toc.svg)
@@ -185,4 +187,11 @@
 
 ```sh
 python3 llm_calc_exercises/tools/build.py
+```
+
+PDF に変換するには（Node.js と Playwright、Poppler の `pdfunite` が必要。日本語フォントは Noto Sans CJK JP 推奨）:
+
+```sh
+NODE_PATH=$(npm root -g) node llm_calc_exercises/tools/to_pdf.js
+pdfunite llm_calc_exercises/pdf/*.pdf llm_calc_exercises/llm_calc_exercises_all.pdf
 ```
