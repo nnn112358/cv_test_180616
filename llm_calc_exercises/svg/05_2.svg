@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="1126" viewBox="0 0 960 1126" font-family="'Noto Sans CJK JP','Noto Sans JP','Hiragino Sans','Yu Gothic','Meiryo','IPAGothic',sans-serif">
+<rect width="960" height="1126" fill="#ffffff"/>
+<rect x="0" y="0" width="960" height="96" fill="#1e3a8a"/>
+<text x="40" y="36" font-size="15" fill="#c7d2fe">LLM Internals 計算例題集 ・ 第5章 クロスエントロピー損失</text>
+<text x="40" y="74" font-size="28" font-weight="700" fill="#ffffff">例題 05-2　二値のクロスエントロピー（BCE）</text>
+<rect x="40" y="120" width="880" height="142" rx="10" fill="#f0fdfa" stroke="#0f766e" stroke-width="1.5"/><rect x="40" y="120" width="6" height="142" rx="3" fill="#0f766e"/><text x="64" y="152" font-size="20" font-weight="700" fill="#0f766e">これは何？ 何に使う？</text>
+<text x="64" y="187" font-size="17" font-weight="700" fill="#b91c1c">何か</text>
+<text x="164" y="187" font-size="17" fill="#1f2937" xml:space="preserve">答えが 2 択（Yes / No）のときのクロスエントロピー。</text>
+<text x="64" y="215" font-size="17" font-weight="700" fill="#b91c1c">何のため</text>
+<text x="164" y="215" font-size="17" fill="#1f2937" xml:space="preserve">スパム判定や、RLHF の報酬モデル（どちらの回答が好ましいか）など、</text>
+<text x="164" y="243" font-size="17" fill="#1f2937" xml:space="preserve">2 択の確率を学習するため。</text>
+<rect x="40" y="280" width="880" height="248" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/><rect x="40" y="280" width="6" height="248" rx="3" fill="#2563eb"/><text x="64" y="312" font-size="20" font-weight="700" fill="#2563eb">問題</text>
+<text x="64" y="347" font-size="17" fill="#1f2937" xml:space="preserve">4 つのサンプルについて、正解ラベル y と「1 である確率」の予測 p が次の通り。</text>
+<rect x="72.0" y="360" width="78.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="111.0" y="380" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">サンプル</text>
+<rect x="150.0" y="360" width="78.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="189.0" y="380" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">A</text>
+<rect x="228.0" y="360" width="78.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="267.0" y="380" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">B</text>
+<rect x="306.0" y="360" width="78.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="345.0" y="380" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">C</text>
+<rect x="384.0" y="360" width="78.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="423.0" y="380" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">D</text>
+<rect x="72.0" y="390" width="78.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="111.0" y="410" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">y</text>
+<rect x="150.0" y="390" width="78.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="189.0" y="410" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
+<rect x="228.0" y="390" width="78.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="267.0" y="410" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0</text>
+<rect x="306.0" y="390" width="78.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="345.0" y="410" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
+<rect x="384.0" y="390" width="78.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="423.0" y="410" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0</text>
+<rect x="72.0" y="420" width="78.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="111.0" y="440" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">p</text>
+<rect x="150.0" y="420" width="78.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="189.0" y="440" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0.9</text>
+<rect x="228.0" y="420" width="78.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="267.0" y="440" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0.2</text>
+<rect x="306.0" y="420" width="78.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="345.0" y="440" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0.6</text>
+<rect x="384.0" y="420" width="78.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="423.0" y="440" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0.7</text>
+<text x="64" y="481" font-size="17" fill="#1f2937" xml:space="preserve">各サンプルの BCE と、4 つの平均を求めよ。</text>
+<text x="64" y="509" font-size="17" fill="#1f2937" xml:space="preserve">（ln 0.9 = −0.105、ln 0.8 = −0.223、ln 0.6 = −0.511、ln 0.3 = −1.204）</text>
+<rect x="40" y="546" width="880" height="362" rx="10" fill="#fffbeb" stroke="#d97706" stroke-width="1.5"/><rect x="40" y="546" width="6" height="362" rx="3" fill="#d97706"/><text x="64" y="578" font-size="20" font-weight="700" fill="#d97706">解説</text>
+<text x="64" y="617" font-size="17" font-weight="700" fill="#d97706">BCE の式</text>
+<rect x="64" y="628" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="647" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">L = −[ y·ln p + (1−y)·ln(1−p) ]</text>
+<text x="64" y="675" font-size="17" fill="#1f2937" xml:space="preserve">y = 1 なら −ln p、y = 0 なら −ln(1−p) だけが残る。</text>
+<text x="64" y="707" font-size="17" font-weight="700" fill="#d97706">サンプルごとに計算</text>
+<rect x="64" y="718" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="737" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">A (y=1, p=0.9): −ln 0.9       = 0.105</text>
+<rect x="64" y="748" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="767" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">B (y=0, p=0.2): −ln(1−0.2) = −ln 0.8 = 0.223</text>
+<rect x="64" y="778" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="797" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">C (y=1, p=0.6): −ln 0.6       = 0.511</text>
+<rect x="64" y="808" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="827" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">D (y=0, p=0.7): −ln(1−0.7) = −ln 0.3 = 1.204   ← 誤り（0 なのに 0.7）</text>
+<text x="64" y="859" font-size="17" font-weight="700" fill="#d97706">平均</text>
+<rect x="64" y="870" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="889" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">(0.105 + 0.223 + 0.511 + 1.204) / 4 = 2.043 / 4 ≈ 0.511</text>
+<rect x="40" y="926" width="880" height="86" rx="10" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/><rect x="40" y="926" width="6" height="86" rx="3" fill="#059669"/><text x="64" y="958" font-size="20" font-weight="700" fill="#059669">解答</text>
+<text x="64" y="993" font-size="17" fill="#1f2937" xml:space="preserve">A <tspan font-weight="700" fill="#b91c1c">0.105</tspan>、B <tspan font-weight="700" fill="#b91c1c">0.223</tspan>、C <tspan font-weight="700" fill="#b91c1c">0.511</tspan>、D <tspan font-weight="700" fill="#b91c1c">1.204</tspan>、平均 <tspan font-weight="700" fill="#b91c1c">約 0.511</tspan></text>
+<rect x="40" y="1030" width="880" height="48" rx="10" fill="#f5f3ff"/>
+<text x="60" y="1061" font-size="17" fill="#7c3aed" xml:space="preserve">★ BCE は「クラスが 2 つのクロスエントロピー」。損失の大部分は外した D から来ている。</text>
+<text x="920" y="1112" font-size="12" text-anchor="end" fill="#6b7280">参考: github.com/amitshekhariitbhu/llm-internals</text>
+</svg>

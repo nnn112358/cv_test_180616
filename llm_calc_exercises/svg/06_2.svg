@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="1100" viewBox="0 0 960 1100" font-family="'Noto Sans CJK JP','Noto Sans JP','Hiragino Sans','Yu Gothic','Meiryo','IPAGothic',sans-serif">
+<rect width="960" height="1100" fill="#ffffff"/>
+<rect x="0" y="0" width="960" height="96" fill="#1e3a8a"/>
+<text x="40" y="36" font-size="15" fill="#c7d2fe">LLM Internals 計算例題集 ・ 第6章 誤差逆伝播</text>
+<text x="40" y="74" font-size="28" font-weight="700" fill="#ffffff">例題 06-2　勾配降下で重みを更新する</text>
+<rect x="40" y="120" width="880" height="142" rx="10" fill="#f0fdfa" stroke="#0f766e" stroke-width="1.5"/><rect x="40" y="120" width="6" height="142" rx="3" fill="#0f766e"/><text x="64" y="152" font-size="20" font-weight="700" fill="#0f766e">これは何？ 何に使う？</text>
+<text x="64" y="187" font-size="17" font-weight="700" fill="#b91c1c">何か</text>
+<text x="164" y="187" font-size="17" fill="#1f2937" xml:space="preserve">勾配と逆向きに、重みを少しずつ動かす最適化の方法。</text>
+<text x="64" y="215" font-size="17" font-weight="700" fill="#b91c1c">何のため</text>
+<text x="164" y="215" font-size="17" fill="#1f2937" xml:space="preserve">損失が減る方向に重みを繰り返し更新して、モデルを学習させるため。</text>
+<text x="164" y="243" font-size="17" fill="#1f2937" xml:space="preserve">LLM で使う Adam / AdamW もこの考え方を発展させたもの。</text>
+<rect x="40" y="280" width="880" height="228" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/><rect x="40" y="280" width="6" height="228" rx="3" fill="#2563eb"/><text x="64" y="312" font-size="20" font-weight="700" fill="#2563eb">問題</text>
+<text x="64" y="347" font-size="17" fill="#1f2937" xml:space="preserve">次の小さなネットワークを考える（バイアスなし）。</text>
+<rect x="64" y="358" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="377" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">h = ReLU(w₁·x)　　ŷ = w₂·h　　L = ½(ŷ − t)²</text>
+<text x="64" y="405" font-size="17" fill="#1f2937" xml:space="preserve">入力 x = 2、目標 t = 1、初期重み w₁ = 0.5、w₂ = 1.5 とする。</text>
+<text x="64" y="433" font-size="17" fill="#1f2937" xml:space="preserve">例題 06-1 の勾配 ∂L/∂w₁ = 1.5、∂L/∂w₂ = 0.5 を使う。</text>
+<text x="64" y="461" font-size="17" fill="#1f2937" xml:space="preserve">(1) 学習率 η = 0.1 で 1 ステップ更新した後の w₁, w₂ を求めよ。</text>
+<text x="64" y="489" font-size="17" fill="#1f2937" xml:space="preserve">(2) 更新後の重みで再び順伝播し、損失 L がどう変わったか確かめよ。</text>
+<rect x="40" y="526" width="880" height="300" rx="10" fill="#fffbeb" stroke="#d97706" stroke-width="1.5"/><rect x="40" y="526" width="6" height="300" rx="3" fill="#d97706"/><text x="64" y="558" font-size="20" font-weight="700" fill="#d97706">解説</text>
+<text x="64" y="597" font-size="17" font-weight="700" fill="#d97706">(1) 更新式 w ← w − η · ∂L/∂w</text>
+<rect x="64" y="608" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="627" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">w₁ = 0.5 − 0.1 × 1.5 = 0.5 − 0.15 = 0.35</text>
+<rect x="64" y="638" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="657" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">w₂ = 1.5 − 0.1 × 0.5 = 1.5 − 0.05 = 1.45</text>
+<text x="64" y="685" font-size="17" fill="#1f2937" xml:space="preserve">勾配が正 → 重みを減らすと損失が下がる、という向きに動く。</text>
+<text x="64" y="717" font-size="17" font-weight="700" fill="#d97706">(2) 新しい重みで順伝播</text>
+<rect x="64" y="728" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="747" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">h = ReLU(0.35 × 2) = 0.7</text>
+<rect x="64" y="758" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="777" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">ŷ = 1.45 × 0.7 = 1.015</text>
+<rect x="64" y="788" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="807" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">L = ½(1.015 − 1)² = ½ × 0.000225 = 0.0001125</text>
+<rect x="40" y="844" width="880" height="114" rx="10" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/><rect x="40" y="844" width="6" height="114" rx="3" fill="#059669"/><text x="64" y="876" font-size="20" font-weight="700" fill="#059669">解答</text>
+<text x="64" y="911" font-size="17" fill="#1f2937" xml:space="preserve">(1) <tspan font-weight="700" fill="#b91c1c">w₁ = 0.35、w₂ = 1.45</tspan></text>
+<text x="64" y="939" font-size="17" fill="#1f2937" xml:space="preserve">(2) <tspan font-weight="700" fill="#b91c1c">L: 0.125 → 約 0.00011</tspan>（予測 1.5 → 1.015 で目標 1 にほぼ一致）</text>
+<rect x="40" y="976" width="880" height="76" rx="10" fill="#f5f3ff"/>
+<text x="60" y="1007" font-size="17" fill="#7c3aed" xml:space="preserve">★ 学習率が大きすぎると行き過ぎて発散し、小さすぎると収束が遅い。</text>
+<text x="60" y="1035" font-size="17" fill="#7c3aed" xml:space="preserve">　 LLM の学習もこの「順伝播 → 逆伝播 → 更新」を何兆トークン分も繰り返している。</text>
+<text x="920" y="1086" font-size="12" text-anchor="end" fill="#6b7280">参考: github.com/amitshekhariitbhu/llm-internals</text>
+</svg>

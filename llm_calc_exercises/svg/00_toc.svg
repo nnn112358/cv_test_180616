@@ -1,0 +1,128 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1438" viewBox="0 0 1200 1438" font-family="'Noto Sans CJK JP','Noto Sans JP','Hiragino Sans','Yu Gothic','Meiryo',sans-serif">
+<rect width="1200" height="1438" fill="#ffffff"/>
+<rect width="1200" height="110" fill="#1e3a8a"/>
+<text x="40" y="58" font-size="34" font-weight="700" fill="#ffffff">LLM Internals 計算例題集 — 目次</text>
+<text x="40" y="92" font-size="17" fill="#c7d2fe">参考: github.com/amitshekhariitbhu/llm-internals ・ 全 24 章 / 50 問 ・ 各問題に「概要 → 問題 → 解説 → 解答」</text>
+<rect x="40.0" y="128" width="540.0" height="30" rx="6" fill="#e0e7ff"/>
+<text x="50.0" y="150" font-size="18" font-weight="700" fill="#1e3a8a">01  トークナイズと BPE</text>
+<text x="570.0" y="150" font-size="12" fill="#6366f1" text-anchor="end">Tokenization / Byte Pair Encoding</text>
+<text x="64.0" y="180" font-size="15" fill="#334155"><tspan fill="#6366f1" font-weight="700">01-1</tspan>  BPE のマージを手計算する</text>
+<text x="64.0" y="204" font-size="15" fill="#334155"><tspan fill="#6366f1" font-weight="700">01-2</tspan>  語彙サイズと埋め込み行列のパラメータ数</text>
+<text x="64.0" y="228" font-size="15" fill="#334155"><tspan fill="#6366f1" font-weight="700">01-3</tspan>  文字数・単語数・トークン数の換算</text>
+<rect x="40.0" y="246" width="540.0" height="30" rx="6" fill="#e0e7ff"/>
+<text x="50.0" y="268" font-size="18" font-weight="700" fill="#1e3a8a">02  Attention の Q・K・V</text>
+<text x="570.0" y="268" font-size="12" fill="#6366f1" text-anchor="end">Math behind Attention</text>
+<text x="64.0" y="298" font-size="15" fill="#334155"><tspan fill="#6366f1" font-weight="700">02-1</tspan>  X·W で Q, K, V を求める</text>
+<text x="64.0" y="322" font-size="15" fill="#334155"><tspan fill="#6366f1" font-weight="700">02-2</tspan>  スコア Q·Kᵀ を計算する</text>
+<text x="64.0" y="346" font-size="15" fill="#334155"><tspan fill="#6366f1" font-weight="700">02-3</tspan>  softmax で重みを出し、重み·V で出力を求める</text>
+<rect x="40.0" y="364" width="540.0" height="30" rx="6" fill="#e0e7ff"/>
+<text x="50.0" y="386" font-size="18" font-weight="700" fill="#1e3a8a">03  √dₖ によるスケーリング</text>
+<text x="570.0" y="386" font-size="12" fill="#6366f1" text-anchor="end">Scaling Factor</text>
+<text x="64.0" y="416" font-size="15" fill="#334155"><tspan fill="#6366f1" font-weight="700">03-1</tspan>  内積の分散が dₖ になることを確かめる</text>
+<text x="64.0" y="440" font-size="15" fill="#334155"><tspan fill="#6366f1" font-weight="700">03-2</tspan>  スケーリングの有無で softmax を比べる</text>
+<rect x="40.0" y="458" width="540.0" height="30" rx="6" fill="#e0e7ff"/>
+<text x="50.0" y="480" font-size="18" font-weight="700" fill="#1e3a8a">04  Causal Mask</text>
+<text x="570.0" y="480" font-size="12" fill="#6366f1" text-anchor="end">Causal Masking</text>
+<text x="64.0" y="510" font-size="15" fill="#334155"><tspan fill="#6366f1" font-weight="700">04-1</tspan>  マスク後の softmax を計算する</text>
+<text x="64.0" y="534" font-size="15" fill="#334155"><tspan fill="#6366f1" font-weight="700">04-2</tspan>  マスク行列の有効要素数を数える</text>
+<rect x="40.0" y="552" width="540.0" height="30" rx="6" fill="#e0e7ff"/>
+<text x="50.0" y="574" font-size="18" font-weight="700" fill="#1e3a8a">05  クロスエントロピー損失</text>
+<text x="570.0" y="574" font-size="12" fill="#6366f1" text-anchor="end">Cross-Entropy Loss</text>
+<text x="64.0" y="604" font-size="15" fill="#334155"><tspan fill="#6366f1" font-weight="700">05-1</tspan>  多クラスの CE を計算する</text>
+<text x="64.0" y="628" font-size="15" fill="#334155"><tspan fill="#6366f1" font-weight="700">05-2</tspan>  二値の BCE を計算する</text>
+<text x="64.0" y="652" font-size="15" fill="#334155"><tspan fill="#6366f1" font-weight="700">05-3</tspan>  勾配 p − y を求める</text>
+<text x="64.0" y="676" font-size="15" fill="#334155"><tspan fill="#6366f1" font-weight="700">05-4</tspan>  Perplexity に変換する</text>
+<rect x="40.0" y="694" width="540.0" height="30" rx="6" fill="#e0e7ff"/>
+<text x="50.0" y="716" font-size="18" font-weight="700" fill="#1e3a8a">06  誤差逆伝播</text>
+<text x="570.0" y="716" font-size="12" fill="#6366f1" text-anchor="end">Backpropagation</text>
+<text x="64.0" y="746" font-size="15" fill="#334155"><tspan fill="#6366f1" font-weight="700">06-1</tspan>  連鎖律で勾配を求める（2層の小さなネット）</text>
+<text x="64.0" y="770" font-size="15" fill="#334155"><tspan fill="#6366f1" font-weight="700">06-2</tspan>  勾配降下で重みを更新する</text>
+<rect x="40.0" y="788" width="540.0" height="30" rx="6" fill="#e0e7ff"/>
+<text x="50.0" y="810" font-size="18" font-weight="700" fill="#1e3a8a">07  Feed-Forward Network</text>
+<text x="570.0" y="810" font-size="12" fill="#6366f1" text-anchor="end">FFN</text>
+<text x="64.0" y="840" font-size="15" fill="#334155"><tspan fill="#6366f1" font-weight="700">07-1</tspan>  FFN のパラメータ数（4倍に広げる場合）</text>
+<text x="64.0" y="864" font-size="15" fill="#334155"><tspan fill="#6366f1" font-weight="700">07-2</tspan>  ReLU / GELU / SwiGLU の出力を計算する</text>
+<text x="64.0" y="888" font-size="15" fill="#334155"><tspan fill="#6366f1" font-weight="700">07-3</tspan>  FFN の FLOPs を数える</text>
+<rect x="40.0" y="906" width="540.0" height="30" rx="6" fill="#e0e7ff"/>
+<text x="50.0" y="928" font-size="18" font-weight="700" fill="#1e3a8a">08  正規化</text>
+<text x="570.0" y="928" font-size="12" fill="#6366f1" text-anchor="end">BatchNorm / LayerNorm / RMSNorm</text>
+<text x="64.0" y="958" font-size="15" fill="#334155"><tspan fill="#6366f1" font-weight="700">08-1</tspan>  BatchNorm と LayerNorm を同じデータで比べる</text>
+<text x="64.0" y="982" font-size="15" fill="#334155"><tspan fill="#6366f1" font-weight="700">08-2</tspan>  RMSNorm を計算し LayerNorm と比べる</text>
+<rect x="40.0" y="1000" width="540.0" height="30" rx="6" fill="#e0e7ff"/>
+<text x="50.0" y="1022" font-size="18" font-weight="700" fill="#1e3a8a">09  Transformer 全体</text>
+<text x="570.0" y="1022" font-size="12" fill="#6366f1" text-anchor="end">Transformer Architecture</text>
+<text x="64.0" y="1052" font-size="15" fill="#334155"><tspan fill="#6366f1" font-weight="700">09-1</tspan>  1 層あたりのパラメータ数</text>
+<text x="64.0" y="1076" font-size="15" fill="#334155"><tspan fill="#6366f1" font-weight="700">09-2</tspan>  GPT-2 small の総パラメータ数を見積もる</text>
+<rect x="40.0" y="1094" width="540.0" height="30" rx="6" fill="#e0e7ff"/>
+<text x="50.0" y="1116" font-size="18" font-weight="700" fill="#1e3a8a">10  KV Cache</text>
+<text x="570.0" y="1116" font-size="12" fill="#6366f1" text-anchor="end">KV Cache</text>
+<text x="64.0" y="1146" font-size="15" fill="#334155"><tspan fill="#6366f1" font-weight="700">10-1</tspan>  KV Cache のメモリ量（GB）</text>
+<text x="64.0" y="1170" font-size="15" fill="#334155"><tspan fill="#6366f1" font-weight="700">10-2</tspan>  KV Cache の有無で計算量を比べる</text>
+<rect x="40.0" y="1188" width="540.0" height="30" rx="6" fill="#e0e7ff"/>
+<text x="50.0" y="1210" font-size="18" font-weight="700" fill="#1e3a8a">11  Paged Attention</text>
+<text x="570.0" y="1210" font-size="12" fill="#6366f1" text-anchor="end">Paged Attention</text>
+<text x="64.0" y="1240" font-size="15" fill="#334155"><tspan fill="#6366f1" font-weight="700">11-1</tspan>  事前確保方式で無駄になるメモリを求める</text>
+<text x="64.0" y="1264" font-size="15" fill="#334155"><tspan fill="#6366f1" font-weight="700">11-2</tspan>  必要なブロック数と内部断片化</text>
+<rect x="40.0" y="1282" width="540.0" height="30" rx="6" fill="#e0e7ff"/>
+<text x="50.0" y="1304" font-size="18" font-weight="700" fill="#1e3a8a">12  Flash Attention</text>
+<text x="570.0" y="1304" font-size="12" fill="#6366f1" text-anchor="end">Flash Attention</text>
+<text x="64.0" y="1334" font-size="15" fill="#334155"><tspan fill="#6366f1" font-weight="700">12-1</tspan>  Online softmax を手計算で追う</text>
+<text x="64.0" y="1358" font-size="15" fill="#334155"><tspan fill="#6366f1" font-weight="700">12-2</tspan>  HBM の読み書き量を比べる</text>
+<rect x="640.0" y="128" width="540.0" height="30" rx="6" fill="#e0e7ff"/>
+<text x="650.0" y="150" font-size="18" font-weight="700" fill="#1e3a8a">13  MHA / MQA / GQA</text>
+<text x="1170.0" y="150" font-size="12" fill="#6366f1" text-anchor="end">Grouped Query Attention</text>
+<text x="664.0" y="180" font-size="15" fill="#334155"><tspan fill="#6366f1" font-weight="700">13-1</tspan>  KV ヘッド数と KV Cache の削減率</text>
+<text x="664.0" y="204" font-size="15" fill="#334155"><tspan fill="#6366f1" font-weight="700">13-2</tspan>  GQA でのヘッドのグループ分け</text>
+<rect x="640.0" y="222" width="540.0" height="30" rx="6" fill="#e0e7ff"/>
+<text x="650.0" y="244" font-size="18" font-weight="700" fill="#1e3a8a">14  RoPE</text>
+<text x="1170.0" y="244" font-size="12" fill="#6366f1" text-anchor="end">Rotary Position Embedding</text>
+<text x="664.0" y="274" font-size="15" fill="#334155"><tspan fill="#6366f1" font-weight="700">14-1</tspan>  2 次元回転を計算する</text>
+<text x="664.0" y="298" font-size="15" fill="#334155"><tspan fill="#6366f1" font-weight="700">14-2</tspan>  内積が相対位置だけで決まることを確かめる</text>
+<rect x="640.0" y="316" width="540.0" height="30" rx="6" fill="#e0e7ff"/>
+<text x="650.0" y="338" font-size="18" font-weight="700" fill="#1e3a8a">15  LoRA</text>
+<text x="1170.0" y="338" font-size="12" fill="#6366f1" text-anchor="end">Low-Rank Adaptation</text>
+<text x="664.0" y="368" font-size="15" fill="#334155"><tspan fill="#6366f1" font-weight="700">15-1</tspan>  学習するパラメータの削減率</text>
+<text x="664.0" y="392" font-size="15" fill="#334155"><tspan fill="#6366f1" font-weight="700">15-2</tspan>  W + BA のマージを計算する</text>
+<rect x="640.0" y="410" width="540.0" height="30" rx="6" fill="#e0e7ff"/>
+<text x="650.0" y="432" font-size="18" font-weight="700" fill="#1e3a8a">16  Mixture of Experts</text>
+<text x="1170.0" y="432" font-size="12" fill="#6366f1" text-anchor="end">MoE</text>
+<text x="664.0" y="462" font-size="15" fill="#334155"><tspan fill="#6366f1" font-weight="700">16-1</tspan>  ルーターの softmax と Top-k の選択</text>
+<text x="664.0" y="486" font-size="15" fill="#334155"><tspan fill="#6366f1" font-weight="700">16-2</tspan>  総パラメータ数とアクティブなパラメータ数</text>
+<rect x="640.0" y="504" width="540.0" height="30" rx="6" fill="#e0e7ff"/>
+<text x="650.0" y="526" font-size="18" font-weight="700" fill="#1e3a8a">17  Speculative Decoding / Medusa / EAGLE</text>
+<text x="1170.0" y="526" font-size="12" fill="#6366f1" text-anchor="end">投機的デコーディング</text>
+<text x="664.0" y="556" font-size="15" fill="#334155"><tspan fill="#6366f1" font-weight="700">17-1</tspan>  受理率 α から期待受理トークン数を求める</text>
+<text x="664.0" y="580" font-size="15" fill="#334155"><tspan fill="#6366f1" font-weight="700">17-2</tspan>  速度向上率を見積もる</text>
+<rect x="640.0" y="598" width="540.0" height="30" rx="6" fill="#e0e7ff"/>
+<text x="650.0" y="620" font-size="18" font-weight="700" fill="#1e3a8a">18  Continuous Batching</text>
+<text x="1170.0" y="620" font-size="12" fill="#6366f1" text-anchor="end">Continuous Batching</text>
+<text x="664.0" y="650" font-size="15" fill="#334155"><tspan fill="#6366f1" font-weight="700">18-1</tspan>  Static と Continuous で GPU 利用率を比べる</text>
+<rect x="640.0" y="668" width="540.0" height="30" rx="6" fill="#e0e7ff"/>
+<text x="650.0" y="690" font-size="18" font-weight="700" fill="#1e3a8a">19  Prefill と Decode</text>
+<text x="1170.0" y="690" font-size="12" fill="#6366f1" text-anchor="end">Inference Optimization</text>
+<text x="664.0" y="720" font-size="15" fill="#334155"><tspan fill="#6366f1" font-weight="700">19-1</tspan>  TTFT・TPOT・E2E レイテンシ</text>
+<text x="664.0" y="744" font-size="15" fill="#334155"><tspan fill="#6366f1" font-weight="700">19-2</tspan>  算術強度（compute-bound か memory-bound か）</text>
+<rect x="640.0" y="762" width="540.0" height="30" rx="6" fill="#e0e7ff"/>
+<text x="650.0" y="784" font-size="18" font-weight="700" fill="#1e3a8a">20  Prompt Caching</text>
+<text x="1170.0" y="784" font-size="12" fill="#6366f1" text-anchor="end">Prompt Caching</text>
+<text x="664.0" y="814" font-size="15" fill="#334155"><tspan fill="#6366f1" font-weight="700">20-1</tspan>  キャッシュの書き込み・読み出しのコストを計算する</text>
+<rect x="640.0" y="832" width="540.0" height="30" rx="6" fill="#e0e7ff"/>
+<text x="650.0" y="854" font-size="18" font-weight="700" fill="#1e3a8a">21  量子化</text>
+<text x="1170.0" y="854" font-size="12" fill="#6366f1" text-anchor="end">Quantization</text>
+<text x="664.0" y="884" font-size="15" fill="#334155"><tspan fill="#6366f1" font-weight="700">21-1</tspan>  FP16 / INT8 / INT4 のメモリ量</text>
+<text x="664.0" y="908" font-size="15" fill="#334155"><tspan fill="#6366f1" font-weight="700">21-2</tspan>  INT8 の量子化と逆量子化、誤差</text>
+<rect x="640.0" y="926" width="540.0" height="30" rx="6" fill="#e0e7ff"/>
+<text x="650.0" y="948" font-size="18" font-weight="700" fill="#1e3a8a">22  サンプリングと停止</text>
+<text x="1170.0" y="948" font-size="12" fill="#6366f1" text-anchor="end">Temperature / Top-k / Stop Token</text>
+<text x="664.0" y="978" font-size="15" fill="#334155"><tspan fill="#6366f1" font-weight="700">22-1</tspan>  温度付き softmax</text>
+<text x="664.0" y="1002" font-size="15" fill="#334155"><tspan fill="#6366f1" font-weight="700">22-2</tspan>  Top-k / Top-p の候補を絞り込む</text>
+<rect x="640.0" y="1020" width="540.0" height="30" rx="6" fill="#e0e7ff"/>
+<text x="650.0" y="1042" font-size="18" font-weight="700" fill="#1e3a8a">23  RLHF</text>
+<text x="1170.0" y="1042" font-size="12" fill="#6366f1" text-anchor="end">Reward Model / KL Penalty</text>
+<text x="664.0" y="1072" font-size="15" fill="#334155"><tspan fill="#6366f1" font-weight="700">23-1</tspan>  Bradley-Terry 損失</text>
+<text x="664.0" y="1096" font-size="15" fill="#334155"><tspan fill="#6366f1" font-weight="700">23-2</tspan>  KL ペナルティ付きの報酬</text>
+<rect x="640.0" y="1114" width="540.0" height="30" rx="6" fill="#e0e7ff"/>
+<text x="650.0" y="1136" font-size="18" font-weight="700" fill="#1e3a8a">24  LLM ウォーターマーク</text>
+<text x="1170.0" y="1136" font-size="12" fill="#6366f1" text-anchor="end">Watermarking</text>
+<text x="664.0" y="1166" font-size="15" fill="#334155"><tspan fill="#6366f1" font-weight="700">24-1</tspan>  Green トークン数から z スコアを求めて判定する</text>
+</svg>

@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="1164" viewBox="0 0 960 1164" font-family="'Noto Sans CJK JP','Noto Sans JP','Hiragino Sans','Yu Gothic','Meiryo','IPAGothic',sans-serif">
+<rect width="960" height="1164" fill="#ffffff"/>
+<rect x="0" y="0" width="960" height="96" fill="#1e3a8a"/>
+<text x="40" y="36" font-size="15" fill="#c7d2fe">LLM Internals 計算例題集 ・ 第3章 √dₖ によるスケーリング</text>
+<text x="40" y="74" font-size="28" font-weight="700" fill="#ffffff">例題 03-2　スケーリングの有無で softmax を比べる</text>
+<rect x="40" y="120" width="880" height="142" rx="10" fill="#f0fdfa" stroke="#0f766e" stroke-width="1.5"/><rect x="40" y="120" width="6" height="142" rx="3" fill="#0f766e"/><text x="64" y="152" font-size="20" font-weight="700" fill="#0f766e">これは何？ 何に使う？</text>
+<text x="64" y="187" font-size="17" font-weight="700" fill="#b91c1c">何か</text>
+<text x="164" y="187" font-size="17" fill="#1f2937" xml:space="preserve">スケーリングしたときとしないときで、softmax の出力と勾配がどう変わるかの比較。</text>
+<text x="64" y="215" font-size="17" font-weight="700" fill="#b91c1c">何のため</text>
+<text x="164" y="215" font-size="17" fill="#1f2937" xml:space="preserve">softmax が飽和（ほぼ 0 と 1 だけ）になるのを防ぎ、勾配を保って</text>
+<text x="164" y="243" font-size="17" fill="#1f2937" xml:space="preserve">学習を安定させるため。</text>
+<rect x="40" y="280" width="880" height="200" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/><rect x="40" y="280" width="6" height="200" rx="3" fill="#2563eb"/><text x="64" y="312" font-size="20" font-weight="700" fill="#2563eb">問題</text>
+<text x="64" y="347" font-size="17" fill="#1f2937" xml:space="preserve">d_k = 16 で、あるクエリのスコア（Q·Kᵀ の 1 行）が次のようになった。</text>
+<rect x="64" y="358" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="377" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">s = (8, 4, 0)</text>
+<text x="64" y="405" font-size="17" fill="#1f2937" xml:space="preserve">(1) スケーリングなしで softmax(s) を求めよ。</text>
+<text x="64" y="433" font-size="17" fill="#1f2937" xml:space="preserve">(2) √d_k で割ってから softmax(s / √d_k) を求めよ。</text>
+<text x="64" y="461" font-size="17" fill="#1f2937" xml:space="preserve">(3) 最大の重み p について、softmax の勾配の大きさ p(1−p) を比べよ。</text>
+<rect x="40" y="498" width="880" height="420" rx="10" fill="#fffbeb" stroke="#d97706" stroke-width="1.5"/><rect x="40" y="498" width="6" height="420" rx="3" fill="#d97706"/><text x="64" y="530" font-size="20" font-weight="700" fill="#d97706">解説</text>
+<text x="64" y="569" font-size="17" font-weight="700" fill="#d97706">(1) そのまま softmax</text>
+<rect x="64" y="580" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="599" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">e⁸ = 2981.0　e⁴ = 54.6　e⁰ = 1　　合計 3036.6</text>
+<rect x="64" y="610" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="629" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">→ (2981.0, 54.6, 1) / 3036.6 = (0.982, 0.018, 0.0003)</text>
+<text x="64" y="657" font-size="17" fill="#1f2937" xml:space="preserve">ほぼ 1 つのトークンだけに注目する（ほぼ one-hot）。</text>
+<text x="64" y="689" font-size="17" font-weight="700" fill="#d97706">(2) √16 = 4 で割ってから softmax</text>
+<rect x="64" y="700" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="719" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">s/4 = (2, 1, 0)</text>
+<rect x="64" y="730" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="749" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">e² = 7.389　e¹ = 2.718　e⁰ = 1　　合計 11.107</text>
+<rect x="64" y="760" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="779" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">→ (0.665, 0.245, 0.090)</text>
+<text x="64" y="811" font-size="17" font-weight="700" fill="#d97706">(3) 勾配 ∂p/∂s = p(1−p)</text>
+<rect x="64" y="822" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="841" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">スケーリングなし: 0.982 × 0.018 ≈ 0.018</text>
+<rect x="64" y="852" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="871" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">スケーリングあり: 0.665 × 0.335 ≈ 0.223  （約 12 倍）</text>
+<text x="64" y="899" font-size="17" fill="#1f2937" xml:space="preserve">softmax が飽和すると勾配がほぼ 0 になり、学習が進まなくなる。</text>
+<rect x="40" y="936" width="880" height="114" rx="10" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/><rect x="40" y="936" width="6" height="114" rx="3" fill="#059669"/><text x="64" y="968" font-size="20" font-weight="700" fill="#059669">解答</text>
+<text x="64" y="1003" font-size="17" fill="#1f2937" xml:space="preserve">(1) <tspan font-weight="700" fill="#b91c1c">(0.982, 0.018, 0.000)</tspan>　(2) <tspan font-weight="700" fill="#b91c1c">(0.665, 0.245, 0.090)</tspan></text>
+<text x="64" y="1031" font-size="17" fill="#1f2937" xml:space="preserve">(3) <tspan font-weight="700" fill="#b91c1c">約 0.018 と約 0.223</tspan>。スケーリングした方が勾配が約 12 倍大きい。</text>
+<rect x="40" y="1068" width="880" height="48" rx="10" fill="#f5f3ff"/>
+<text x="60" y="1099" font-size="17" fill="#7c3aed" xml:space="preserve">★ スケーリングは「softmax を飽和させず、勾配を流し続ける」ための工夫。</text>
+<text x="920" y="1150" font-size="12" text-anchor="end" fill="#6b7280">参考: github.com/amitshekhariitbhu/llm-internals</text>
+</svg>

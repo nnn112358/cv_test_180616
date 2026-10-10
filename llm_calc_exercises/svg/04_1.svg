@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="1300" viewBox="0 0 960 1300" font-family="'Noto Sans CJK JP','Noto Sans JP','Hiragino Sans','Yu Gothic','Meiryo','IPAGothic',sans-serif">
+<rect width="960" height="1300" fill="#ffffff"/>
+<rect x="0" y="0" width="960" height="96" fill="#1e3a8a"/>
+<text x="40" y="36" font-size="15" fill="#c7d2fe">LLM Internals 計算例題集 ・ 第4章 Causal Mask</text>
+<text x="40" y="74" font-size="28" font-weight="700" fill="#ffffff">例題 04-1　マスク後の softmax を計算する</text>
+<rect x="40" y="120" width="880" height="142" rx="10" fill="#f0fdfa" stroke="#0f766e" stroke-width="1.5"/><rect x="40" y="120" width="6" height="142" rx="3" fill="#0f766e"/><text x="64" y="152" font-size="20" font-weight="700" fill="#0f766e">これは何？ 何に使う？</text>
+<text x="64" y="187" font-size="17" font-weight="700" fill="#b91c1c">何か</text>
+<text x="164" y="187" font-size="17" fill="#1f2937" xml:space="preserve">Attention で「自分より後ろ（未来）のトークン」を見えなくするマスク。</text>
+<text x="64" y="215" font-size="17" font-weight="700" fill="#b91c1c">何のため</text>
+<text x="164" y="215" font-size="17" fill="#1f2937" xml:space="preserve">次のトークンを予測するときに答えを先に見る「カンニング」を防ぎ、</text>
+<text x="164" y="243" font-size="17" fill="#1f2937" xml:space="preserve">学習時と文章生成時の条件を揃えるため。GPT 型のデコーダでは必須。</text>
+<rect x="40" y="280" width="880" height="276" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/><rect x="40" y="280" width="6" height="276" rx="3" fill="#2563eb"/><text x="64" y="312" font-size="20" font-weight="700" fill="#2563eb">問題</text>
+<text x="64" y="347" font-size="17" fill="#1f2937" xml:space="preserve">デコーダの 3 トークン「私 は 猫」について、スケーリング後のスコア S が次のように出た。</text>
+<text x="72" y="411.0" font-size="16" fill="#1f2937">S =</text>
+<rect x="108.88" y="360" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="136.88" y="380" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">2</text>
+<rect x="164.88" y="360" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="192.88" y="380" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
+<rect x="220.88" y="360" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="248.88" y="380" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0</text>
+<rect x="108.88" y="390" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="136.88" y="410" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
+<rect x="164.88" y="390" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="192.88" y="410" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">3</text>
+<rect x="220.88" y="390" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="248.88" y="410" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
+<rect x="108.88" y="420" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="136.88" y="440" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0</text>
+<rect x="164.88" y="420" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="192.88" y="440" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">2</text>
+<rect x="220.88" y="420" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="248.88" y="440" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">2</text>
+<text x="64" y="481" font-size="17" fill="#1f2937" xml:space="preserve">行 i はトークン i（クエリ）、列 j はトークン j（キー）を表す。</text>
+<text x="64" y="509" font-size="17" fill="#1f2937" xml:space="preserve">(1) Causal Mask を加えたスコア行列を書け。</text>
+<text x="64" y="537" font-size="17" fill="#1f2937" xml:space="preserve">(2) 各行に softmax を適用して重み行列 A を求めよ（小数第 3 位まで）。</text>
+<rect x="40" y="574" width="880" height="374" rx="10" fill="#fffbeb" stroke="#d97706" stroke-width="1.5"/><rect x="40" y="574" width="6" height="374" rx="3" fill="#d97706"/><text x="64" y="606" font-size="20" font-weight="700" fill="#d97706">解説</text>
+<text x="64" y="645" font-size="17" font-weight="700" fill="#d97706">(1) 未来（j &gt; i）のスコアを −∞ にする</text>
+<text x="64" y="673" font-size="17" fill="#1f2937" xml:space="preserve">生成時、トークン i はまだ出ていない i+1 以降を見てはいけない。</text>
+<text x="64" y="701" font-size="17" fill="#1f2937" xml:space="preserve">そこで上三角（対角より右上）に −∞ を足す。e^{−∞} = 0 なので重みが 0 になる。</text>
+<text x="72" y="765.0" font-size="16" fill="#1f2937">M =</text>
+<rect x="108.88" y="714" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="136.88" y="734" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0</text>
+<rect x="164.88" y="714" width="56" height="30" fill="#fee2e2" stroke="#94a3b8"/>
+<text x="192.88" y="734" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">-∞</text>
+<rect x="220.88" y="714" width="56" height="30" fill="#fee2e2" stroke="#94a3b8"/>
+<text x="248.88" y="734" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">-∞</text>
+<rect x="108.88" y="744" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="136.88" y="764" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0</text>
+<rect x="164.88" y="744" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="192.88" y="764" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0</text>
+<rect x="220.88" y="744" width="56" height="30" fill="#fee2e2" stroke="#94a3b8"/>
+<text x="248.88" y="764" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">-∞</text>
+<rect x="108.88" y="774" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="136.88" y="794" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0</text>
+<rect x="164.88" y="774" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="192.88" y="794" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0</text>
+<rect x="220.88" y="774" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="248.88" y="794" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0</text>
+<text x="312.88" y="765.0" font-size="16" fill="#1f2937">S + M =</text>
+<rect x="385.6" y="714" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="413.6" y="734" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">2</text>
+<rect x="441.6" y="714" width="56" height="30" fill="#fee2e2" stroke="#94a3b8"/>
+<text x="469.6" y="734" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">-∞</text>
+<rect x="497.6" y="714" width="56" height="30" fill="#fee2e2" stroke="#94a3b8"/>
+<text x="525.6" y="734" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">-∞</text>
+<rect x="385.6" y="744" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="413.6" y="764" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
+<rect x="441.6" y="744" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="469.6" y="764" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">3</text>
+<rect x="497.6" y="744" width="56" height="30" fill="#fee2e2" stroke="#94a3b8"/>
+<text x="525.6" y="764" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">-∞</text>
+<rect x="385.6" y="774" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="413.6" y="794" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0</text>
+<rect x="441.6" y="774" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="469.6" y="794" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">2</text>
+<rect x="497.6" y="774" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="525.6" y="794" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">2</text>
+<text x="64" y="839" font-size="17" font-weight="700" fill="#d97706">(2) −∞ を除いた要素だけで softmax</text>
+<rect x="64" y="850" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="869" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">1行目: e² だけ → (1, 0, 0)</text>
+<rect x="64" y="880" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="899" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">2行目: e¹=2.718, e³=20.086 合計 22.804 → (0.119, 0.881, 0)</text>
+<rect x="64" y="910" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="929" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">3行目: e⁰=1, e²=7.389, e²=7.389 合計 15.778 → (0.063, 0.468, 0.468)</text>
+<rect x="40" y="966" width="880" height="192" rx="10" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/><rect x="40" y="966" width="6" height="192" rx="3" fill="#059669"/><text x="64" y="998" font-size="20" font-weight="700" fill="#059669">解答</text>
+<text x="72" y="1069.0" font-size="16" fill="#1f2937">A ≈</text>
+<rect x="108.88" y="1018" width="63.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="140.38" y="1038" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1.000</text>
+<rect x="171.88" y="1018" width="63.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="203.38" y="1038" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0</text>
+<rect x="234.88" y="1018" width="63.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="266.38" y="1038" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0</text>
+<rect x="108.88" y="1048" width="63.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="140.38" y="1068" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0.119</text>
+<rect x="171.88" y="1048" width="63.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="203.38" y="1068" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0.881</text>
+<rect x="234.88" y="1048" width="63.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="266.38" y="1068" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0</text>
+<rect x="108.88" y="1078" width="63.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="140.38" y="1098" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0.063</text>
+<rect x="171.88" y="1078" width="63.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="203.38" y="1098" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0.468</text>
+<rect x="234.88" y="1078" width="63.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="266.38" y="1098" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0.468</text>
+<text x="64" y="1139" font-size="17" fill="#1f2937" xml:space="preserve">A は<tspan font-weight="700" fill="#b91c1c">下三角行列</tspan>になり、各行の和は 1。</text>
+<rect x="40" y="1176" width="880" height="76" rx="10" fill="#f5f3ff"/>
+<text x="60" y="1207" font-size="17" fill="#7c3aed" xml:space="preserve">★ 1 行目の「私」は自分自身しか見られないので、重みは必ず 1 になる。</text>
+<text x="60" y="1235" font-size="17" fill="#7c3aed" xml:space="preserve">　 マスクを softmax の「前」に入れるのがポイント（後で 0 にすると行の和が 1 でなくなる）。</text>
+<text x="920" y="1286" font-size="12" text-anchor="end" fill="#6b7280">参考: github.com/amitshekhariitbhu/llm-internals</text>
+</svg>

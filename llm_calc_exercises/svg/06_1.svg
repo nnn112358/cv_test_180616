@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="1132" viewBox="0 0 960 1132" font-family="'Noto Sans CJK JP','Noto Sans JP','Hiragino Sans','Yu Gothic','Meiryo','IPAGothic',sans-serif">
+<rect width="960" height="1132" fill="#ffffff"/>
+<rect x="0" y="0" width="960" height="96" fill="#1e3a8a"/>
+<text x="40" y="36" font-size="15" fill="#c7d2fe">LLM Internals 計算例題集 ・ 第6章 誤差逆伝播</text>
+<text x="40" y="74" font-size="28" font-weight="700" fill="#ffffff">例題 06-1　連鎖律で勾配を求める</text>
+<rect x="40" y="120" width="880" height="142" rx="10" fill="#f0fdfa" stroke="#0f766e" stroke-width="1.5"/><rect x="40" y="120" width="6" height="142" rx="3" fill="#0f766e"/><text x="64" y="152" font-size="20" font-weight="700" fill="#0f766e">これは何？ 何に使う？</text>
+<text x="64" y="187" font-size="17" font-weight="700" fill="#b91c1c">何か</text>
+<text x="164" y="187" font-size="17" fill="#1f2937" xml:space="preserve">出力の損失から、各重みの勾配を連鎖律で効率よく求めるアルゴリズム。</text>
+<text x="64" y="215" font-size="17" font-weight="700" fill="#b91c1c">何のため</text>
+<text x="164" y="215" font-size="17" fill="#1f2937" xml:space="preserve">何十億ものパラメータそれぞれについて「どちらにどれだけ動かせば損失が</text>
+<text x="164" y="243" font-size="17" fill="#1f2937" xml:space="preserve">減るか」を、逆向きの計算 1 回でまとめて求めるため。</text>
+<rect x="40" y="280" width="880" height="200" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/><rect x="40" y="280" width="6" height="200" rx="3" fill="#2563eb"/><text x="64" y="312" font-size="20" font-weight="700" fill="#2563eb">問題</text>
+<text x="64" y="347" font-size="17" fill="#1f2937" xml:space="preserve">次の小さなネットワークを考える（バイアスなし）。</text>
+<rect x="64" y="358" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="377" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">h = ReLU(w₁·x)　　ŷ = w₂·h　　L = ½(ŷ − t)²</text>
+<text x="64" y="405" font-size="17" fill="#1f2937" xml:space="preserve">入力 x = 2、目標 t = 1、初期重み w₁ = 0.5、w₂ = 1.5 とする。</text>
+<text x="64" y="433" font-size="17" fill="#1f2937" xml:space="preserve">(1) 順伝播で h、ŷ、L を求めよ。</text>
+<text x="64" y="461" font-size="17" fill="#1f2937" xml:space="preserve">(2) 連鎖律を使って ∂L/∂w₂ と ∂L/∂w₁ を求めよ。</text>
+<rect x="40" y="498" width="880" height="360" rx="10" fill="#fffbeb" stroke="#d97706" stroke-width="1.5"/><rect x="40" y="498" width="6" height="360" rx="3" fill="#d97706"/><text x="64" y="530" font-size="20" font-weight="700" fill="#d97706">解説</text>
+<text x="64" y="569" font-size="17" font-weight="700" fill="#d97706">(1) 順伝播（左から右へ）</text>
+<rect x="64" y="580" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="599" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">w₁·x = 0.5 × 2 = 1 → h = ReLU(1) = 1</text>
+<rect x="64" y="610" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="629" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">ŷ = w₂·h = 1.5 × 1 = 1.5</text>
+<rect x="64" y="640" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="659" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">L = ½(1.5 − 1)² = ½ × 0.25 = 0.125</text>
+<text x="64" y="691" font-size="17" font-weight="700" fill="#d97706">(2) 逆伝播（右から左へ、局所的な微分を掛けていく）</text>
+<rect x="64" y="702" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="721" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">∂L/∂ŷ = ŷ − t = 0.5</text>
+<rect x="64" y="732" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="751" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">∂L/∂w₂ = ∂L/∂ŷ · ∂ŷ/∂w₂ = 0.5 × h = 0.5 × 1 = 0.5</text>
+<rect x="64" y="762" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="781" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">∂L/∂h = ∂L/∂ŷ · ∂ŷ/∂h = 0.5 × w₂ = 0.5 × 1.5 = 0.75</text>
+<text x="64" y="809" font-size="17" fill="#1f2937" xml:space="preserve">ReLU の微分は「入力 &gt; 0 なら 1、それ以外は 0」。今は入力 1 &gt; 0 なので 1。</text>
+<rect x="64" y="820" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="839" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">∂L/∂w₁ = ∂L/∂h · ReLU&#x27;(w₁x) · x = 0.75 × 1 × 2 = 1.5</text>
+<rect x="40" y="876" width="880" height="114" rx="10" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/><rect x="40" y="876" width="6" height="114" rx="3" fill="#059669"/><text x="64" y="908" font-size="20" font-weight="700" fill="#059669">解答</text>
+<text x="64" y="943" font-size="17" fill="#1f2937" xml:space="preserve">(1) <tspan font-weight="700" fill="#b91c1c">h = 1、ŷ = 1.5、L = 0.125</tspan></text>
+<text x="64" y="971" font-size="17" fill="#1f2937" xml:space="preserve">(2) <tspan font-weight="700" fill="#b91c1c">∂L/∂w₂ = 0.5、∂L/∂w₁ = 1.5</tspan></text>
+<rect x="40" y="1008" width="880" height="76" rx="10" fill="#f5f3ff"/>
+<text x="60" y="1039" font-size="17" fill="#7c3aed" xml:space="preserve">★ 逆伝播は「出力側の勾配 × その場の局所微分」を入力側へ順に渡していくだけ。</text>
+<text x="60" y="1067" font-size="17" fill="#7c3aed" xml:space="preserve">　 もし w₁·x ≤ 0 なら ReLU&#x27; = 0 となり、w₁ に勾配が流れない（dead ReLU）。</text>
+<text x="920" y="1118" font-size="12" text-anchor="end" fill="#6b7280">参考: github.com/amitshekhariitbhu/llm-internals</text>
+</svg>

@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="1032" viewBox="0 0 960 1032" font-family="'Noto Sans CJK JP','Noto Sans JP','Hiragino Sans','Yu Gothic','Meiryo','IPAGothic',sans-serif">
+<rect width="960" height="1032" fill="#ffffff"/>
+<rect x="0" y="0" width="960" height="96" fill="#1e3a8a"/>
+<text x="40" y="36" font-size="15" fill="#c7d2fe">LLM Internals 計算例題集 ・ 第5章 クロスエントロピー損失</text>
+<text x="40" y="74" font-size="28" font-weight="700" fill="#ffffff">例題 05-4　言語モデルの損失と Perplexity</text>
+<rect x="40" y="120" width="880" height="142" rx="10" fill="#f0fdfa" stroke="#0f766e" stroke-width="1.5"/><rect x="40" y="120" width="6" height="142" rx="3" fill="#0f766e"/><text x="64" y="152" font-size="20" font-weight="700" fill="#0f766e">これは何？ 何に使う？</text>
+<text x="64" y="187" font-size="17" font-weight="700" fill="#b91c1c">何か</text>
+<text x="164" y="187" font-size="17" fill="#1f2937" xml:space="preserve">1 トークンあたりの平均損失を指数にした、言語モデルの評価指標。</text>
+<text x="64" y="215" font-size="17" font-weight="700" fill="#b91c1c">何のため</text>
+<text x="164" y="215" font-size="17" fill="#1f2937" xml:space="preserve">モデルが次のトークンをどれだけ迷わず予測できるかを、</text>
+<text x="164" y="243" font-size="17" fill="#1f2937" xml:space="preserve">「平均して何択で迷っているか」という直感的な数で比べるため。</text>
+<rect x="40" y="280" width="880" height="218" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/><rect x="40" y="280" width="6" height="218" rx="3" fill="#2563eb"/><text x="64" y="312" font-size="20" font-weight="700" fill="#2563eb">問題</text>
+<text x="64" y="347" font-size="17" fill="#1f2937" xml:space="preserve">言語モデルが 4 トークンの文を生成したとき、各位置で正解トークンに付けた確率が次の通り。</text>
+<rect x="72.0" y="360" width="75.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="109.5" y="380" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">位置</text>
+<rect x="147.0" y="360" width="75.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="184.5" y="380" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
+<rect x="222.0" y="360" width="75.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="259.5" y="380" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">2</text>
+<rect x="297.0" y="360" width="75.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="334.5" y="380" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">3</text>
+<rect x="372.0" y="360" width="75.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="409.5" y="380" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">4</text>
+<rect x="72.0" y="390" width="75.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="109.5" y="410" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">p(正解)</text>
+<rect x="147.0" y="390" width="75.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="184.5" y="410" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0.5</text>
+<rect x="222.0" y="390" width="75.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="259.5" y="410" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0.25</text>
+<rect x="297.0" y="390" width="75.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="334.5" y="410" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0.8</text>
+<rect x="372.0" y="390" width="75.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="409.5" y="410" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0.1</text>
+<text x="64" y="451" font-size="17" fill="#1f2937" xml:space="preserve">(1) 平均クロスエントロピー損失（1 トークンあたり）を求めよ。</text>
+<text x="64" y="479" font-size="17" fill="#1f2937" xml:space="preserve">(2) Perplexity = exp(平均損失) を求めよ。</text>
+<rect x="40" y="516" width="880" height="270" rx="10" fill="#fffbeb" stroke="#d97706" stroke-width="1.5"/><rect x="40" y="516" width="6" height="270" rx="3" fill="#d97706"/><text x="64" y="548" font-size="20" font-weight="700" fill="#d97706">解説</text>
+<text x="64" y="587" font-size="17" font-weight="700" fill="#d97706">(1) 各位置の −ln p を平均する</text>
+<rect x="64" y="598" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="617" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">−ln 0.5 = 0.693　−ln 0.25 = 1.386　−ln 0.8 = 0.223　−ln 0.1 = 2.303</text>
+<rect x="64" y="628" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="647" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">平均 = (0.693 + 1.386 + 0.223 + 2.303) / 4 = 4.605 / 4 ≈ 1.151</text>
+<text x="64" y="679" font-size="17" font-weight="700" fill="#d97706">(2) Perplexity</text>
+<rect x="64" y="690" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="709" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">PPL = e^{1.151} ≈ 3.162</text>
+<text x="64" y="737" font-size="17" fill="#1f2937" xml:space="preserve">別解: PPL は確率の積の −1/N 乗（幾何平均の逆数）でもある。</text>
+<rect x="64" y="748" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="767" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">0.5 × 0.25 × 0.8 × 0.1 = 0.01 → 0.01^{−1/4} = 10^{0.5} = √10 ≈ 3.162</text>
+<rect x="40" y="804" width="880" height="86" rx="10" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/><rect x="40" y="804" width="6" height="86" rx="3" fill="#059669"/><text x="64" y="836" font-size="20" font-weight="700" fill="#059669">解答</text>
+<text x="64" y="871" font-size="17" fill="#1f2937" xml:space="preserve">(1) <tspan font-weight="700" fill="#b91c1c">約 1.151</tspan>　(2) <tspan font-weight="700" fill="#b91c1c">PPL = √10 ≈ 3.16</tspan></text>
+<rect x="40" y="908" width="880" height="76" rx="10" fill="#f5f3ff"/>
+<text x="60" y="939" font-size="17" fill="#7c3aed" xml:space="preserve">★ PPL ≈ 3.16 は「毎回およそ 3 つの候補で迷っている」くらいの意味。</text>
+<text x="60" y="967" font-size="17" fill="#7c3aed" xml:space="preserve">　 一様に V 語から選ぶモデルなら PPL = V になる。</text>
+<text x="920" y="1018" font-size="12" text-anchor="end" fill="#6b7280">参考: github.com/amitshekhariitbhu/llm-internals</text>
+</svg>
