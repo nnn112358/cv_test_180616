@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="882" viewBox="0 0 960 882" font-family="'Noto Sans CJK JP','Noto Sans JP','Hiragino Sans','Yu Gothic','Meiryo','IPAGothic',sans-serif">
+<rect width="960" height="882" fill="#ffffff"/>
+<rect x="0" y="0" width="960" height="96" fill="#1e3a8a"/>
+<text x="40" y="36" font-size="15" fill="#c7d2fe">LLM Internals 計算例題集 ・ 第1章 トークナイズと BPE</text>
+<text x="40" y="74" font-size="28" font-weight="700" fill="#ffffff">例題 01-3　文字数・単語数・トークン数の換算</text>
+<rect x="40" y="120" width="880" height="170" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/><rect x="40" y="120" width="6" height="170" rx="3" fill="#2563eb"/><text x="64" y="152" font-size="20" font-weight="700" fill="#2563eb">問題</text>
+<text x="64" y="187" font-size="17" fill="#1f2937" xml:space="preserve">英語では経験則として <tspan font-weight="700" fill="#b91c1c">1 トークン ≈ 4 文字 ≈ 0.75 単語</tspan> と見積もれる。</text>
+<text x="64" y="215" font-size="17" fill="#1f2937" xml:space="preserve">(1) 3,000 単語の英文レポートは約何トークンか。</text>
+<text x="64" y="243" font-size="17" fill="#1f2937" xml:space="preserve">(2) コンテキスト長 128,000 トークンのモデルに、このレポートは何本まで入るか。</text>
+<text x="64" y="271" font-size="17" fill="#1f2937" xml:space="preserve">(3) 入力料金が 100 万トークンあたり $3 のとき、1 本を送るといくらかかるか。</text>
+<rect x="40" y="308" width="880" height="328" rx="10" fill="#fffbeb" stroke="#d97706" stroke-width="1.5"/><rect x="40" y="308" width="6" height="328" rx="3" fill="#d97706"/><text x="64" y="340" font-size="20" font-weight="700" fill="#d97706">解説</text>
+<text x="64" y="379" font-size="17" font-weight="700" fill="#d97706">(1) 単語 → トークン</text>
+<text x="64" y="407" font-size="17" fill="#1f2937" xml:space="preserve">1 トークン ≈ 0.75 単語なので、トークン数 = 単語数 ÷ 0.75。</text>
+<rect x="64" y="418" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="437" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">3,000 ÷ 0.75 = 4,000 トークン</text>
+<text x="64" y="465" font-size="17" fill="#1f2937" xml:space="preserve">（参考: 1 単語 ≈ 5.3 文字なので 16,000 文字 ÷ 4 = 4,000 とも一致する）</text>
+<text x="64" y="497" font-size="17" font-weight="700" fill="#d97706">(2) コンテキストに何本入るか</text>
+<rect x="64" y="508" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="527" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">128,000 ÷ 4,000 = 32 本</text>
+<text x="64" y="555" font-size="17" fill="#1f2937" xml:space="preserve">実際には指示文や出力のぶんの余白も必要なので、少し減る。</text>
+<text x="64" y="587" font-size="17" font-weight="700" fill="#d97706">(3) 料金</text>
+<rect x="64" y="598" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="617" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">4,000 × ($3 ÷ 1,000,000) = $0.012</text>
+<rect x="40" y="654" width="880" height="86" rx="10" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/><rect x="40" y="654" width="6" height="86" rx="3" fill="#059669"/><text x="64" y="686" font-size="20" font-weight="700" fill="#059669">解答</text>
+<text x="64" y="721" font-size="17" fill="#1f2937" xml:space="preserve">(1) <tspan font-weight="700" fill="#b91c1c">約 4,000 トークン</tspan>　(2) <tspan font-weight="700" fill="#b91c1c">約 32 本</tspan>　(3) <tspan font-weight="700" fill="#b91c1c">約 $0.012（1.2 セント）</tspan></text>
+<rect x="40" y="758" width="880" height="76" rx="10" fill="#f5f3ff"/>
+<text x="60" y="789" font-size="17" fill="#7c3aed" xml:space="preserve">★ 日本語は 1 文字 ≈ 1〜2 トークンになりやすく、英語より割高。</text>
+<text x="60" y="817" font-size="17" fill="#7c3aed" xml:space="preserve">　 料金・速度・コンテキスト長はすべて「文字数」ではなく「トークン数」で決まる。</text>
+<text x="920" y="868" font-size="12" text-anchor="end" fill="#6b7280">参考: github.com/amitshekhariitbhu/llm-internals</text>
+</svg>

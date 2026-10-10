@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="938" viewBox="0 0 960 938" font-family="'Noto Sans CJK JP','Noto Sans JP','Hiragino Sans','Yu Gothic','Meiryo','IPAGothic',sans-serif">
+<rect width="960" height="938" fill="#ffffff"/>
+<rect x="0" y="0" width="960" height="96" fill="#1e3a8a"/>
+<text x="40" y="36" font-size="15" fill="#c7d2fe">LLM Internals 計算例題集 ・ 第1章 トークナイズと BPE</text>
+<text x="40" y="74" font-size="28" font-weight="700" fill="#ffffff">例題 01-2　語彙サイズと埋め込み行列のパラメータ数</text>
+<rect x="40" y="120" width="880" height="198" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/><rect x="40" y="120" width="6" height="198" rx="3" fill="#2563eb"/><text x="64" y="152" font-size="20" font-weight="700" fill="#2563eb">問題</text>
+<text x="64" y="187" font-size="17" fill="#1f2937" xml:space="preserve">GPT-2 small は語彙サイズ V = 50,257、埋め込み次元 d = 768 である。</text>
+<text x="64" y="215" font-size="17" fill="#1f2937" xml:space="preserve">(1) トークン埋め込み行列のパラメータ数はいくつか。</text>
+<text x="64" y="243" font-size="17" fill="#1f2937" xml:space="preserve">(2) 出力層（LM Head: d → V の線形層、バイアスなし）を埋め込みと</text>
+<text x="64" y="271" font-size="17" fill="#1f2937" xml:space="preserve">　　<tspan font-weight="700" fill="#b91c1c">共有しない</tspan>場合、両方を合わせたパラメータ数はいくつか。</text>
+<text x="64" y="299" font-size="17" fill="#1f2937" xml:space="preserve">(3) (1) の行列を FP16（1 パラメータ 2 バイト）で保存すると何 MB か。</text>
+<rect x="40" y="336" width="880" height="328" rx="10" fill="#fffbeb" stroke="#d97706" stroke-width="1.5"/><rect x="40" y="336" width="6" height="328" rx="3" fill="#d97706"/><text x="64" y="368" font-size="20" font-weight="700" fill="#d97706">解説</text>
+<text x="64" y="407" font-size="17" font-weight="700" fill="#d97706">埋め込み行列は「語彙数 × 次元」の表</text>
+<text x="64" y="435" font-size="17" fill="#1f2937" xml:space="preserve">トークン ID ごとに d 次元のベクトルを 1 行ずつ持つので、形は V × d。</text>
+<rect x="64" y="446" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="465" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">50,257 × 768 = 38,597,376  ≈ 38.6 M</text>
+<text x="64" y="497" font-size="17" font-weight="700" fill="#d97706">LM Head は d → V の行列（d × V）</text>
+<text x="64" y="525" font-size="17" fill="#1f2937" xml:space="preserve">形は転置だが要素数は同じ。共有しなければ 2 倍になる。</text>
+<rect x="64" y="536" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="555" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">38,597,376 × 2 = 77,194,752  ≈ 77.2 M</text>
+<text x="64" y="583" font-size="17" fill="#1f2937" xml:space="preserve">GPT-2 は weight tying（共有）を使うので、実際は (1) の分だけで済む。</text>
+<text x="64" y="615" font-size="17" font-weight="700" fill="#d97706">メモリ量 = パラメータ数 × バイト数</text>
+<rect x="64" y="626" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="645" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">38,597,376 × 2 B = 77,194,752 B ≈ 77.2 MB（10⁶ B = 1 MB として）</text>
+<rect x="40" y="682" width="880" height="142" rx="10" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/><rect x="40" y="682" width="6" height="142" rx="3" fill="#059669"/><text x="64" y="714" font-size="20" font-weight="700" fill="#059669">解答</text>
+<text x="64" y="749" font-size="17" fill="#1f2937" xml:space="preserve">(1) <tspan font-weight="700" fill="#b91c1c">38,597,376 ≈ 38.6 M</tspan></text>
+<text x="64" y="777" font-size="17" fill="#1f2937" xml:space="preserve">(2) <tspan font-weight="700" fill="#b91c1c">77,194,752 ≈ 77.2 M</tspan></text>
+<text x="64" y="805" font-size="17" fill="#1f2937" xml:space="preserve">(3) <tspan font-weight="700" fill="#b91c1c">約 77.2 MB</tspan></text>
+<rect x="40" y="842" width="880" height="48" rx="10" fill="#f5f3ff"/>
+<text x="60" y="873" font-size="17" fill="#7c3aed" xml:space="preserve">★ GPT-2 small 全体（約 124 M）の約 3 割が埋め込み行列。語彙を増やすと効いてくる。</text>
+<text x="920" y="924" font-size="12" text-anchor="end" fill="#6b7280">参考: github.com/amitshekhariitbhu/llm-internals</text>
+</svg>

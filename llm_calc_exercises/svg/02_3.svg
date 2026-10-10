@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="1130" viewBox="0 0 960 1130" font-family="'Noto Sans CJK JP','Noto Sans JP','Hiragino Sans','Yu Gothic','Meiryo','IPAGothic',sans-serif">
+<rect width="960" height="1130" fill="#ffffff"/>
+<rect x="0" y="0" width="960" height="96" fill="#1e3a8a"/>
+<text x="40" y="36" font-size="15" fill="#c7d2fe">LLM Internals 計算例題集 ・ 第2章 Attention の Q・K・V</text>
+<text x="40" y="74" font-size="28" font-weight="700" fill="#ffffff">例題 02-3　softmax で重みを出し、出力を求める</text>
+<rect x="40" y="120" width="880" height="248" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/><rect x="40" y="120" width="6" height="248" rx="3" fill="#2563eb"/><text x="64" y="152" font-size="20" font-weight="700" fill="#2563eb">問題</text>
+<text x="64" y="187" font-size="17" fill="#1f2937" xml:space="preserve">例題 02-2 のスケーリング後のスコアと、02-1 の V を使う。</text>
+<text x="72" y="251.0" font-size="16" fill="#1f2937">S/√2 =</text>
+<rect x="135.76" y="200" width="63.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="167.26" y="220" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0.707</text>
+<rect x="198.76" y="200" width="63.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="230.26" y="220" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1.414</text>
+<rect x="261.76" y="200" width="63.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="293.26" y="220" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">2.121</text>
+<rect x="135.76" y="230" width="63.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="167.26" y="250" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0.000</text>
+<rect x="198.76" y="230" width="63.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="230.26" y="250" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0.707</text>
+<rect x="261.76" y="230" width="63.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="293.26" y="250" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0.707</text>
+<rect x="135.76" y="260" width="63.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="167.26" y="280" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0.707</text>
+<rect x="198.76" y="260" width="63.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="230.26" y="280" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">2.121</text>
+<rect x="261.76" y="260" width="63.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="293.26" y="280" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">2.828</text>
+<text x="360.76" y="251.0" font-size="16" fill="#1f2937">V =</text>
+<rect x="397.64" y="200" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="425.64" y="220" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
+<rect x="453.64" y="200" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="481.64" y="220" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">2</text>
+<rect x="397.64" y="230" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="425.64" y="250" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0</text>
+<rect x="453.64" y="230" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="481.64" y="250" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
+<rect x="397.64" y="260" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="425.64" y="280" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
+<rect x="453.64" y="260" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="481.64" y="280" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">3</text>
+<text x="64" y="321" font-size="17" fill="#1f2937" xml:space="preserve">(1) 各行に softmax を適用して重み行列 A を求めよ（小数第 3 位まで）。</text>
+<text x="64" y="349" font-size="17" fill="#1f2937" xml:space="preserve">(2) 出力 Z = A·V を求めよ。</text>
+<rect x="40" y="386" width="880" height="420" rx="10" fill="#fffbeb" stroke="#d97706" stroke-width="1.5"/><rect x="40" y="386" width="6" height="420" rx="3" fill="#d97706"/><text x="64" y="418" font-size="20" font-weight="700" fill="#d97706">解説</text>
+<text x="64" y="457" font-size="17" font-weight="700" fill="#d97706">(1) softmax(z)_j = e^{z_j} / Σ_k e^{z_k}（行ごとに計算）</text>
+<rect x="64" y="468" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="487" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">1行目: e^0.707=2.028  e^1.414=4.113  e^2.121=8.342  合計 14.483</text>
+<rect x="64" y="498" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="517" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">        → 2.028/14.483=0.140  4.113/14.483=0.284  8.342/14.483=0.576</text>
+<rect x="64" y="528" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="547" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">2行目: e^0=1  e^0.707=2.028  e^0.707=2.028  合計 5.056</text>
+<rect x="64" y="558" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="577" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">        → 0.198  0.401  0.401</text>
+<rect x="64" y="588" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="607" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">3行目: 2.028  8.342  16.918  合計 27.288 → 0.074  0.306  0.620</text>
+<text x="64" y="635" font-size="17" fill="#1f2937" xml:space="preserve">各行の和は 1 になる（確率分布）。</text>
+<text x="64" y="667" font-size="17" font-weight="700" fill="#d97706">(2) 出力は V の行を重み付きで足したもの</text>
+<rect x="64" y="678" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="697" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">z1 = 0.140·(1,2) + 0.284·(0,1) + 0.576·(1,3)</text>
+<rect x="64" y="708" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="727" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">   = (0.140+0+0.576, 0.280+0.284+1.728) = (0.716, 2.292)</text>
+<rect x="64" y="738" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="757" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">z2 = 0.198·(1,2) + 0.401·(0,1) + 0.401·(1,3) = (0.599, 2.000)</text>
+<rect x="64" y="768" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="787" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">z3 = 0.074·(1,2) + 0.306·(0,1) + 0.620·(1,3) = (0.694, 2.314)</text>
+<rect x="40" y="824" width="880" height="192" rx="10" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/><rect x="40" y="824" width="6" height="192" rx="3" fill="#059669"/><text x="64" y="856" font-size="20" font-weight="700" fill="#059669">解答</text>
+<text x="72" y="927.0" font-size="16" fill="#1f2937">A ≈</text>
+<rect x="108.88" y="876" width="63.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="140.38" y="896" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0.140</text>
+<rect x="171.88" y="876" width="63.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="203.38" y="896" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0.284</text>
+<rect x="234.88" y="876" width="63.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="266.38" y="896" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0.576</text>
+<rect x="108.88" y="906" width="63.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="140.38" y="926" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0.198</text>
+<rect x="171.88" y="906" width="63.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="203.38" y="926" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0.401</text>
+<rect x="234.88" y="906" width="63.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="266.38" y="926" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0.401</text>
+<rect x="108.88" y="936" width="63.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="140.38" y="956" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0.074</text>
+<rect x="171.88" y="936" width="63.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="203.38" y="956" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0.306</text>
+<rect x="234.88" y="936" width="63.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="266.38" y="956" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0.620</text>
+<text x="333.88" y="927.0" font-size="16" fill="#1f2937">Z = A·V ≈</text>
+<rect x="424.52" y="876" width="63.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="456.02" y="896" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0.716</text>
+<rect x="487.52" y="876" width="63.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="519.02" y="896" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">2.292</text>
+<rect x="424.52" y="906" width="63.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="456.02" y="926" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0.599</text>
+<rect x="487.52" y="906" width="63.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="519.02" y="926" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">2.000</text>
+<rect x="424.52" y="936" width="63.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="456.02" y="956" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0.694</text>
+<rect x="487.52" y="936" width="63.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="519.02" y="956" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">2.314</text>
+<text x="64" y="997" font-size="17" fill="#1f2937" xml:space="preserve">まとめると <tspan font-weight="700" fill="#b91c1c">Attention(Q,K,V) = softmax(Q·Kᵀ / √d_k)·V</tspan>。</text>
+<rect x="40" y="1034" width="880" height="48" rx="10" fill="#f5f3ff"/>
+<text x="60" y="1065" font-size="17" fill="#7c3aed" xml:space="preserve">★ 出力の各行は「全トークンの V の加重平均」。どのトークンをどれだけ混ぜるかを A が決める。</text>
+<text x="920" y="1116" font-size="12" text-anchor="end" fill="#6b7280">参考: github.com/amitshekhariitbhu/llm-internals</text>
+</svg>
