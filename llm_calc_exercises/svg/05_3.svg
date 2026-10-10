@@ -1,34 +1,40 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="960" height="916" viewBox="0 0 960 916" font-family="'Noto Sans CJK JP','Noto Sans JP','Hiragino Sans','Yu Gothic','Meiryo','IPAGothic',sans-serif">
-<rect width="960" height="916" fill="#ffffff"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="1076" viewBox="0 0 960 1076" font-family="'Noto Sans CJK JP','Noto Sans JP','Hiragino Sans','Yu Gothic','Meiryo','IPAGothic',sans-serif">
+<rect width="960" height="1076" fill="#ffffff"/>
 <rect x="0" y="0" width="960" height="96" fill="#1e3a8a"/>
 <text x="40" y="36" font-size="15" fill="#c7d2fe">LLM Internals 計算例題集 ・ 第5章 クロスエントロピー損失</text>
 <text x="40" y="74" font-size="28" font-weight="700" fill="#ffffff">例題 05-3　softmax + CE の勾配 p − y</text>
-<rect x="40" y="120" width="880" height="170" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/><rect x="40" y="120" width="6" height="170" rx="3" fill="#2563eb"/><text x="64" y="152" font-size="20" font-weight="700" fill="#2563eb">問題</text>
-<text x="64" y="187" font-size="17" fill="#1f2937" xml:space="preserve">ロジット z = (2, 1, 0) に softmax をかけ、正解クラスを 2 番目（y = (0, 1, 0)）とする。</text>
-<text x="64" y="215" font-size="17" fill="#1f2937" xml:space="preserve">(1) 確率 p = softmax(z) を求めよ。</text>
-<text x="64" y="243" font-size="17" fill="#1f2937" xml:space="preserve">(2) 損失 L = −ln p₂ を求めよ。</text>
-<text x="64" y="271" font-size="17" fill="#1f2937" xml:space="preserve">(3) ロジットに関する勾配 ∂L/∂z を求めよ。</text>
-<rect x="40" y="308" width="880" height="362" rx="10" fill="#fffbeb" stroke="#d97706" stroke-width="1.5"/><rect x="40" y="308" width="6" height="362" rx="3" fill="#d97706"/><text x="64" y="340" font-size="20" font-weight="700" fill="#d97706">解説</text>
-<text x="64" y="379" font-size="17" font-weight="700" fill="#d97706">(1) softmax</text>
-<rect x="64" y="390" width="836" height="26" rx="4" fill="#f3f4f6"/>
-<text x="76" y="409" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">e² = 7.389　e¹ = 2.718　e⁰ = 1　合計 11.107</text>
-<rect x="64" y="420" width="836" height="26" rx="4" fill="#f3f4f6"/>
-<text x="76" y="439" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">p = (0.665, 0.245, 0.090)</text>
-<text x="64" y="471" font-size="17" font-weight="700" fill="#d97706">(2) 損失</text>
-<rect x="64" y="482" width="836" height="26" rx="4" fill="#f3f4f6"/>
-<text x="76" y="501" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">L = −ln 0.245 ≈ 1.408</text>
-<text x="64" y="533" font-size="17" font-weight="700" fill="#d97706">(3) softmax と CE を合わせた勾配は p − y になる</text>
-<rect x="64" y="544" width="836" height="26" rx="4" fill="#f3f4f6"/>
-<text x="76" y="563" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">L = −z₂ + ln Σ_k e^{z_k}  を z_j で微分すると</text>
-<rect x="64" y="574" width="836" height="26" rx="4" fill="#f3f4f6"/>
-<text x="76" y="593" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">∂L/∂z_j = −y_j + e^{z_j} / Σ_k e^{z_k} = p_j − y_j</text>
-<rect x="64" y="604" width="836" height="26" rx="4" fill="#f3f4f6"/>
-<text x="76" y="623" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">∂L/∂z = (0.665−0, 0.245−1, 0.090−0) = (0.665, −0.755, 0.090)</text>
-<text x="64" y="651" font-size="17" fill="#1f2937" xml:space="preserve">勾配降下（z ← z − η·∂L/∂z）で、正解のロジットは上がり、ほかは下がる。</text>
-<rect x="40" y="688" width="880" height="114" rx="10" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/><rect x="40" y="688" width="6" height="114" rx="3" fill="#059669"/><text x="64" y="720" font-size="20" font-weight="700" fill="#059669">解答</text>
-<text x="64" y="755" font-size="17" fill="#1f2937" xml:space="preserve">(1) <tspan font-weight="700" fill="#b91c1c">p ≈ (0.665, 0.245, 0.090)</tspan>　(2) <tspan font-weight="700" fill="#b91c1c">L ≈ 1.408</tspan></text>
-<text x="64" y="783" font-size="17" fill="#1f2937" xml:space="preserve">(3) <tspan font-weight="700" fill="#b91c1c">∂L/∂z ≈ (0.665, −0.755, 0.090)</tspan>　（成分の和は 0）</text>
-<rect x="40" y="820" width="880" height="48" rx="10" fill="#f5f3ff"/>
-<text x="60" y="851" font-size="17" fill="#7c3aed" xml:space="preserve">★ 「予測 − 正解」という非常にシンプルな勾配になるのが、softmax + CE を組み合わせる理由。</text>
-<text x="920" y="902" font-size="12" text-anchor="end" fill="#6b7280">参考: github.com/amitshekhariitbhu/llm-internals</text>
+<rect x="40" y="120" width="880" height="142" rx="10" fill="#f0fdfa" stroke="#0f766e" stroke-width="1.5"/><rect x="40" y="120" width="6" height="142" rx="3" fill="#0f766e"/><text x="64" y="152" font-size="20" font-weight="700" fill="#0f766e">これは何？ 何に使う？</text>
+<text x="64" y="187" font-size="17" font-weight="700" fill="#b91c1c">何か</text>
+<text x="164" y="187" font-size="17" fill="#1f2937" xml:space="preserve">softmax と クロスエントロピーを組み合わせたときの、ロジットに関する勾配。</text>
+<text x="64" y="215" font-size="17" font-weight="700" fill="#b91c1c">何のため</text>
+<text x="164" y="215" font-size="17" fill="#1f2937" xml:space="preserve">誤差逆伝播のスタート地点になる値。「予測 − 正解」という単純な式に</text>
+<text x="164" y="243" font-size="17" fill="#1f2937" xml:space="preserve">なるので、計算が速く数値的にも安定する。</text>
+<rect x="40" y="280" width="880" height="170" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/><rect x="40" y="280" width="6" height="170" rx="3" fill="#2563eb"/><text x="64" y="312" font-size="20" font-weight="700" fill="#2563eb">問題</text>
+<text x="64" y="347" font-size="17" fill="#1f2937" xml:space="preserve">ロジット z = (2, 1, 0) に softmax をかけ、正解クラスを 2 番目（y = (0, 1, 0)）とする。</text>
+<text x="64" y="375" font-size="17" fill="#1f2937" xml:space="preserve">(1) 確率 p = softmax(z) を求めよ。</text>
+<text x="64" y="403" font-size="17" fill="#1f2937" xml:space="preserve">(2) 損失 L = −ln p₂ を求めよ。</text>
+<text x="64" y="431" font-size="17" fill="#1f2937" xml:space="preserve">(3) ロジットに関する勾配 ∂L/∂z を求めよ。</text>
+<rect x="40" y="468" width="880" height="362" rx="10" fill="#fffbeb" stroke="#d97706" stroke-width="1.5"/><rect x="40" y="468" width="6" height="362" rx="3" fill="#d97706"/><text x="64" y="500" font-size="20" font-weight="700" fill="#d97706">解説</text>
+<text x="64" y="539" font-size="17" font-weight="700" fill="#d97706">(1) softmax</text>
+<rect x="64" y="550" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="569" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">e² = 7.389　e¹ = 2.718　e⁰ = 1　合計 11.107</text>
+<rect x="64" y="580" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="599" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">p = (0.665, 0.245, 0.090)</text>
+<text x="64" y="631" font-size="17" font-weight="700" fill="#d97706">(2) 損失</text>
+<rect x="64" y="642" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="661" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">L = −ln 0.245 ≈ 1.408</text>
+<text x="64" y="693" font-size="17" font-weight="700" fill="#d97706">(3) softmax と CE を合わせた勾配は p − y になる</text>
+<rect x="64" y="704" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="723" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">L = −z₂ + ln Σ_k e^{z_k}  を z_j で微分すると</text>
+<rect x="64" y="734" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="753" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">∂L/∂z_j = −y_j + e^{z_j} / Σ_k e^{z_k} = p_j − y_j</text>
+<rect x="64" y="764" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="783" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">∂L/∂z = (0.665−0, 0.245−1, 0.090−0) = (0.665, −0.755, 0.090)</text>
+<text x="64" y="811" font-size="17" fill="#1f2937" xml:space="preserve">勾配降下（z ← z − η·∂L/∂z）で、正解のロジットは上がり、ほかは下がる。</text>
+<rect x="40" y="848" width="880" height="114" rx="10" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/><rect x="40" y="848" width="6" height="114" rx="3" fill="#059669"/><text x="64" y="880" font-size="20" font-weight="700" fill="#059669">解答</text>
+<text x="64" y="915" font-size="17" fill="#1f2937" xml:space="preserve">(1) <tspan font-weight="700" fill="#b91c1c">p ≈ (0.665, 0.245, 0.090)</tspan>　(2) <tspan font-weight="700" fill="#b91c1c">L ≈ 1.408</tspan></text>
+<text x="64" y="943" font-size="17" fill="#1f2937" xml:space="preserve">(3) <tspan font-weight="700" fill="#b91c1c">∂L/∂z ≈ (0.665, −0.755, 0.090)</tspan>　（成分の和は 0）</text>
+<rect x="40" y="980" width="880" height="48" rx="10" fill="#f5f3ff"/>
+<text x="60" y="1011" font-size="17" fill="#7c3aed" xml:space="preserve">★ 「予測 − 正解」という非常にシンプルな勾配になるのが、softmax + CE を組み合わせる理由。</text>
+<text x="920" y="1062" font-size="12" text-anchor="end" fill="#6b7280">参考: github.com/amitshekhariitbhu/llm-internals</text>
 </svg>

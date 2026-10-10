@@ -1,12 +1,13 @@
 """例題 SVG を描くための小さなレンダラ。
 
 例題 1 問は dict で表す:
-  id, chapter, title, problem, explain, answer, point
-problem / explain / answer は「要素」のリスト。要素は次のいずれか:
+  id, chapter, title, intro, problem, explain, answer, point
+intro / problem / explain / answer は「要素」のリスト。要素は次のいずれか:
   "文章"                 … 通常の行（**強調** が使える）
   "$ 数式"               … 等幅・背景付きの数式行
   ("h", "見出し")         … 解説のステップ見出し
   ("tables", [(ラベル, 行列), ...])  … 行列・表を横に並べる
+  ("def", "ラベル", [行, ...])  … ラベル付きの段落（ぶら下げインデント）
   ("gap",)               … 少し空ける
 """
 import html
@@ -23,7 +24,7 @@ C = {
     "head": "#1e3a8a", "headsub": "#c7d2fe", "text": "#1f2937", "mute": "#6b7280",
     "q": "#2563eb", "qbg": "#eff6ff", "e": "#d97706", "ebg": "#fffbeb",
     "a": "#059669", "abg": "#ecfdf5", "em": "#b91c1c", "mathbg": "#f3f4f6",
-    "cell": "#ffffff", "cellb": "#94a3b8", "point": "#7c3aed", "pbg": "#f5f3ff",
+    "i": "#0f766e", "ibg": "#f0fdfa", "cell": "#ffffff", "cellb": "#94a3b8", "point": "#7c3aed", "pbg": "#f5f3ff",
 }
 
 
@@ -108,6 +109,10 @@ class Canvas:
                 self.y += LH
             elif it[0] == "tables":
                 self.tables(x + 8, it[1])
+            elif it[0] == "def":
+                self.add(f'<text x="{x}" y="{self.y + 21}" font-size="{FS}" font-weight="700" fill="{C["em"]}">{html.escape(it[1])}</text>')
+                for s in it[2]:
+                    self.line(s, x + 100, color)
             elif it[0] == "gap":
                 self.y += 10
 
@@ -132,6 +137,8 @@ def render(p, total_label="LLM Internals 計算例題集"):
     cv.add(f'<text x="{M}" y="74" font-size="28" font-weight="700" fill="#ffffff">例題 {p["id"]}　{html.escape(p["title"])}</text>')
     cv.check(f'例題 {p["id"]}　{p["title"]}', M, 28)
     cv.y = 120
+    if p.get("intro"):
+        cv.section("これは何？ 何に使う？", "i", p["intro"])
     cv.section("問題", "q", p["problem"])
     cv.section("解説", "e", p["explain"])
     cv.section("解答", "a", p["answer"])

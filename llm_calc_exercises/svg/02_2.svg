@@ -1,132 +1,138 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="960" height="1114" viewBox="0 0 960 1114" font-family="'Noto Sans CJK JP','Noto Sans JP','Hiragino Sans','Yu Gothic','Meiryo','IPAGothic',sans-serif">
-<rect width="960" height="1114" fill="#ffffff"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="1274" viewBox="0 0 960 1274" font-family="'Noto Sans CJK JP','Noto Sans JP','Hiragino Sans','Yu Gothic','Meiryo','IPAGothic',sans-serif">
+<rect width="960" height="1274" fill="#ffffff"/>
 <rect x="0" y="0" width="960" height="96" fill="#1e3a8a"/>
 <text x="40" y="36" font-size="15" fill="#c7d2fe">LLM Internals 計算例題集 ・ 第2章 Attention の Q・K・V</text>
 <text x="40" y="74" font-size="28" font-weight="700" fill="#ffffff">例題 02-2　スコア Q·Kᵀ を計算する</text>
-<rect x="40" y="120" width="880" height="382" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/><rect x="40" y="120" width="6" height="382" rx="3" fill="#2563eb"/><text x="64" y="152" font-size="20" font-weight="700" fill="#2563eb">問題</text>
-<text x="64" y="187" font-size="17" fill="#1f2937" xml:space="preserve">3 トークンの入力 X（各行が 1 トークン、d = 2）と重み行列が次のように与えられている。</text>
-<text x="72" y="251.0" font-size="16" fill="#1f2937">X =</text>
-<rect x="108.88" y="200" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="136.88" y="220" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
-<rect x="164.88" y="200" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="192.88" y="220" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0</text>
-<rect x="108.88" y="230" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="136.88" y="250" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0</text>
-<rect x="164.88" y="230" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="192.88" y="250" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
-<rect x="108.88" y="260" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="136.88" y="280" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
-<rect x="164.88" y="260" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="192.88" y="280" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
-<text x="256.88" y="236.0" font-size="16" fill="#1f2937">W_Q =</text>
-<rect x="311.68" y="200" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="339.68" y="220" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
-<rect x="367.68" y="200" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="395.68" y="220" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
-<rect x="311.68" y="230" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="339.68" y="250" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0</text>
-<rect x="367.68" y="230" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="395.68" y="250" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
-<text x="459.68" y="236.0" font-size="16" fill="#1f2937">W_K =</text>
-<rect x="514.48" y="200" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="542.48" y="220" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
-<rect x="570.48" y="200" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="598.48" y="220" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0</text>
-<rect x="514.48" y="230" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="542.48" y="250" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
-<rect x="570.48" y="230" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="598.48" y="250" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
-<text x="662.48" y="236.0" font-size="16" fill="#1f2937">W_V =</text>
-<rect x="717.28" y="200" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="745.28" y="220" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
-<rect x="773.28" y="200" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="801.28" y="220" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">2</text>
-<rect x="717.28" y="230" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="745.28" y="250" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0</text>
-<rect x="773.28" y="230" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="801.28" y="250" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
-<text x="64" y="321" font-size="17" fill="#1f2937" xml:space="preserve">例題 02-1 で求めた Q, K を使う。</text>
-<text x="72" y="385.0" font-size="16" fill="#1f2937">Q =</text>
-<rect x="108.88" y="334" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="136.88" y="354" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
-<rect x="164.88" y="334" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="192.88" y="354" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
-<rect x="108.88" y="364" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="136.88" y="384" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0</text>
-<rect x="164.88" y="364" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="192.88" y="384" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
-<rect x="108.88" y="394" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="136.88" y="414" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
-<rect x="164.88" y="394" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="192.88" y="414" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">2</text>
-<text x="256.88" y="385.0" font-size="16" fill="#1f2937">K =</text>
-<rect x="293.76" y="334" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="321.76" y="354" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
-<rect x="349.76" y="334" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="377.76" y="354" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0</text>
-<rect x="293.76" y="364" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="321.76" y="384" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
-<rect x="349.76" y="364" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="377.76" y="384" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
-<rect x="293.76" y="394" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="321.76" y="414" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">2</text>
-<rect x="349.76" y="394" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="377.76" y="414" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
-<text x="64" y="455" font-size="17" fill="#1f2937" xml:space="preserve">(1) スコア行列 S = Q·Kᵀ を求めよ。</text>
-<text x="64" y="483" font-size="17" fill="#1f2937" xml:space="preserve">(2) d_k = 2 として S / √d_k を小数第 3 位まで求めよ。</text>
-<rect x="40" y="520" width="880" height="298" rx="10" fill="#fffbeb" stroke="#d97706" stroke-width="1.5"/><rect x="40" y="520" width="6" height="298" rx="3" fill="#d97706"/><text x="64" y="552" font-size="20" font-weight="700" fill="#d97706">解説</text>
-<text x="64" y="591" font-size="17" font-weight="700" fill="#d97706">(1) S の (i, j) 成分 = トークン i の q とトークン j の k の内積</text>
-<rect x="64" y="602" width="836" height="26" rx="4" fill="#f3f4f6"/>
-<text x="76" y="621" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">q1=(1,1): k1=(1,0)→1  k2=(1,1)→2  k3=(2,1)→3</text>
-<rect x="64" y="632" width="836" height="26" rx="4" fill="#f3f4f6"/>
-<text x="76" y="651" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">q2=(0,1): k1→0        k2→1        k3→1</text>
-<rect x="64" y="662" width="836" height="26" rx="4" fill="#f3f4f6"/>
-<text x="76" y="681" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">q3=(1,2): k1→1        k2→1+2=3    k3→2+2=4</text>
-<text x="64" y="709" font-size="17" fill="#1f2937" xml:space="preserve">値が大きいほど「トークン i がトークン j に注目したい」度合いが強い。</text>
-<text x="64" y="741" font-size="17" font-weight="700" fill="#d97706">(2) √2 ≈ 1.4142 で割る</text>
-<rect x="64" y="752" width="836" height="26" rx="4" fill="#f3f4f6"/>
-<text x="76" y="771" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">1/√2 = 0.707　2/√2 = 1.414　3/√2 = 2.121　4/√2 = 2.828</text>
-<text x="64" y="799" font-size="17" fill="#1f2937" xml:space="preserve">d_k が大きいと内積が大きくなりすぎるので、√d_k で割って大きさを揃える（第 3 章）。</text>
-<rect x="40" y="836" width="880" height="164" rx="10" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/><rect x="40" y="836" width="6" height="164" rx="3" fill="#059669"/><text x="64" y="868" font-size="20" font-weight="700" fill="#059669">解答</text>
-<text x="72" y="939.0" font-size="16" fill="#1f2937">S =</text>
-<rect x="108.88" y="888" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="136.88" y="908" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
-<rect x="164.88" y="888" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="192.88" y="908" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">2</text>
-<rect x="220.88" y="888" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="248.88" y="908" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">3</text>
-<rect x="108.88" y="918" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="136.88" y="938" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0</text>
-<rect x="164.88" y="918" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="192.88" y="938" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
-<rect x="220.88" y="918" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="248.88" y="938" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
-<rect x="108.88" y="948" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="136.88" y="968" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
-<rect x="164.88" y="948" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="192.88" y="968" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">3</text>
-<rect x="220.88" y="948" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="248.88" y="968" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">4</text>
-<text x="312.88" y="939.0" font-size="16" fill="#1f2937">S/√2 ≈</text>
-<rect x="376.64" y="888" width="63.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="408.14" y="908" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0.707</text>
-<rect x="439.64" y="888" width="63.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="471.14" y="908" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1.414</text>
-<rect x="502.64" y="888" width="63.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="534.14" y="908" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">2.121</text>
-<rect x="376.64" y="918" width="63.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="408.14" y="938" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0.000</text>
-<rect x="439.64" y="918" width="63.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="471.14" y="938" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0.707</text>
-<rect x="502.64" y="918" width="63.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="534.14" y="938" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0.707</text>
-<rect x="376.64" y="948" width="63.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="408.14" y="968" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0.707</text>
-<rect x="439.64" y="948" width="63.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="471.14" y="968" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">2.121</text>
-<rect x="502.64" y="948" width="63.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="534.14" y="968" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">2.828</text>
-<rect x="40" y="1018" width="880" height="48" rx="10" fill="#f5f3ff"/>
-<text x="60" y="1049" font-size="17" fill="#7c3aed" xml:space="preserve">★ S は「トークン数 × トークン数」の正方行列。長さ n の文なら n² 個の内積が必要。</text>
-<text x="920" y="1100" font-size="12" text-anchor="end" fill="#6b7280">参考: github.com/amitshekhariitbhu/llm-internals</text>
+<rect x="40" y="120" width="880" height="142" rx="10" fill="#f0fdfa" stroke="#0f766e" stroke-width="1.5"/><rect x="40" y="120" width="6" height="142" rx="3" fill="#0f766e"/><text x="64" y="152" font-size="20" font-weight="700" fill="#0f766e">これは何？ 何に使う？</text>
+<text x="64" y="187" font-size="17" font-weight="700" fill="#b91c1c">何か</text>
+<text x="164" y="187" font-size="17" fill="#1f2937" xml:space="preserve">各トークンの Query と全トークンの Key の内積を並べた「関連度の表」。</text>
+<text x="64" y="215" font-size="17" font-weight="700" fill="#b91c1c">何のため</text>
+<text x="164" y="215" font-size="17" fill="#1f2937" xml:space="preserve">文中のどの単語がどの単語と関係が深いか（例:「それ」が指す名詞）を</text>
+<text x="164" y="243" font-size="17" fill="#1f2937" xml:space="preserve">数値で表すため。値が大きいほど強く参照する。</text>
+<rect x="40" y="280" width="880" height="382" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/><rect x="40" y="280" width="6" height="382" rx="3" fill="#2563eb"/><text x="64" y="312" font-size="20" font-weight="700" fill="#2563eb">問題</text>
+<text x="64" y="347" font-size="17" fill="#1f2937" xml:space="preserve">3 トークンの入力 X（各行が 1 トークン、d = 2）と重み行列が次のように与えられている。</text>
+<text x="72" y="411.0" font-size="16" fill="#1f2937">X =</text>
+<rect x="108.88" y="360" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="136.88" y="380" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
+<rect x="164.88" y="360" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="192.88" y="380" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0</text>
+<rect x="108.88" y="390" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="136.88" y="410" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0</text>
+<rect x="164.88" y="390" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="192.88" y="410" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
+<rect x="108.88" y="420" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="136.88" y="440" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
+<rect x="164.88" y="420" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="192.88" y="440" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
+<text x="256.88" y="396.0" font-size="16" fill="#1f2937">W_Q =</text>
+<rect x="311.68" y="360" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="339.68" y="380" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
+<rect x="367.68" y="360" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="395.68" y="380" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
+<rect x="311.68" y="390" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="339.68" y="410" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0</text>
+<rect x="367.68" y="390" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="395.68" y="410" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
+<text x="459.68" y="396.0" font-size="16" fill="#1f2937">W_K =</text>
+<rect x="514.48" y="360" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="542.48" y="380" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
+<rect x="570.48" y="360" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="598.48" y="380" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0</text>
+<rect x="514.48" y="390" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="542.48" y="410" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
+<rect x="570.48" y="390" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="598.48" y="410" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
+<text x="662.48" y="396.0" font-size="16" fill="#1f2937">W_V =</text>
+<rect x="717.28" y="360" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="745.28" y="380" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
+<rect x="773.28" y="360" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="801.28" y="380" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">2</text>
+<rect x="717.28" y="390" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="745.28" y="410" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0</text>
+<rect x="773.28" y="390" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="801.28" y="410" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
+<text x="64" y="481" font-size="17" fill="#1f2937" xml:space="preserve">例題 02-1 で求めた Q, K を使う。</text>
+<text x="72" y="545.0" font-size="16" fill="#1f2937">Q =</text>
+<rect x="108.88" y="494" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="136.88" y="514" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
+<rect x="164.88" y="494" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="192.88" y="514" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
+<rect x="108.88" y="524" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="136.88" y="544" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0</text>
+<rect x="164.88" y="524" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="192.88" y="544" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
+<rect x="108.88" y="554" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="136.88" y="574" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
+<rect x="164.88" y="554" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="192.88" y="574" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">2</text>
+<text x="256.88" y="545.0" font-size="16" fill="#1f2937">K =</text>
+<rect x="293.76" y="494" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="321.76" y="514" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
+<rect x="349.76" y="494" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="377.76" y="514" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0</text>
+<rect x="293.76" y="524" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="321.76" y="544" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
+<rect x="349.76" y="524" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="377.76" y="544" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
+<rect x="293.76" y="554" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="321.76" y="574" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">2</text>
+<rect x="349.76" y="554" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="377.76" y="574" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
+<text x="64" y="615" font-size="17" fill="#1f2937" xml:space="preserve">(1) スコア行列 S = Q·Kᵀ を求めよ。</text>
+<text x="64" y="643" font-size="17" fill="#1f2937" xml:space="preserve">(2) d_k = 2 として S / √d_k を小数第 3 位まで求めよ。</text>
+<rect x="40" y="680" width="880" height="298" rx="10" fill="#fffbeb" stroke="#d97706" stroke-width="1.5"/><rect x="40" y="680" width="6" height="298" rx="3" fill="#d97706"/><text x="64" y="712" font-size="20" font-weight="700" fill="#d97706">解説</text>
+<text x="64" y="751" font-size="17" font-weight="700" fill="#d97706">(1) S の (i, j) 成分 = トークン i の q とトークン j の k の内積</text>
+<rect x="64" y="762" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="781" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">q1=(1,1): k1=(1,0)→1  k2=(1,1)→2  k3=(2,1)→3</text>
+<rect x="64" y="792" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="811" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">q2=(0,1): k1→0        k2→1        k3→1</text>
+<rect x="64" y="822" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="841" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">q3=(1,2): k1→1        k2→1+2=3    k3→2+2=4</text>
+<text x="64" y="869" font-size="17" fill="#1f2937" xml:space="preserve">値が大きいほど「トークン i がトークン j に注目したい」度合いが強い。</text>
+<text x="64" y="901" font-size="17" font-weight="700" fill="#d97706">(2) √2 ≈ 1.4142 で割る</text>
+<rect x="64" y="912" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="931" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">1/√2 = 0.707　2/√2 = 1.414　3/√2 = 2.121　4/√2 = 2.828</text>
+<text x="64" y="959" font-size="17" fill="#1f2937" xml:space="preserve">d_k が大きいと内積が大きくなりすぎるので、√d_k で割って大きさを揃える（第 3 章）。</text>
+<rect x="40" y="996" width="880" height="164" rx="10" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/><rect x="40" y="996" width="6" height="164" rx="3" fill="#059669"/><text x="64" y="1028" font-size="20" font-weight="700" fill="#059669">解答</text>
+<text x="72" y="1099.0" font-size="16" fill="#1f2937">S =</text>
+<rect x="108.88" y="1048" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="136.88" y="1068" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
+<rect x="164.88" y="1048" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="192.88" y="1068" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">2</text>
+<rect x="220.88" y="1048" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="248.88" y="1068" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">3</text>
+<rect x="108.88" y="1078" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="136.88" y="1098" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0</text>
+<rect x="164.88" y="1078" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="192.88" y="1098" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
+<rect x="220.88" y="1078" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="248.88" y="1098" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
+<rect x="108.88" y="1108" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="136.88" y="1128" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1</text>
+<rect x="164.88" y="1108" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="192.88" y="1128" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">3</text>
+<rect x="220.88" y="1108" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="248.88" y="1128" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">4</text>
+<text x="312.88" y="1099.0" font-size="16" fill="#1f2937">S/√2 ≈</text>
+<rect x="376.64" y="1048" width="63.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="408.14" y="1068" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0.707</text>
+<rect x="439.64" y="1048" width="63.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="471.14" y="1068" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">1.414</text>
+<rect x="502.64" y="1048" width="63.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="534.14" y="1068" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">2.121</text>
+<rect x="376.64" y="1078" width="63.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="408.14" y="1098" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0.000</text>
+<rect x="439.64" y="1078" width="63.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="471.14" y="1098" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0.707</text>
+<rect x="502.64" y="1078" width="63.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="534.14" y="1098" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0.707</text>
+<rect x="376.64" y="1108" width="63.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="408.14" y="1128" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0.707</text>
+<rect x="439.64" y="1108" width="63.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="471.14" y="1128" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">2.121</text>
+<rect x="502.64" y="1108" width="63.0" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="534.14" y="1128" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">2.828</text>
+<rect x="40" y="1178" width="880" height="48" rx="10" fill="#f5f3ff"/>
+<text x="60" y="1209" font-size="17" fill="#7c3aed" xml:space="preserve">★ S は「トークン数 × トークン数」の正方行列。長さ n の文なら n² 個の内積が必要。</text>
+<text x="920" y="1260" font-size="12" text-anchor="end" fill="#6b7280">参考: github.com/amitshekhariitbhu/llm-internals</text>
 </svg>

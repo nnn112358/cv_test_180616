@@ -1,65 +1,72 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="960" height="1226" viewBox="0 0 960 1226" font-family="'Noto Sans CJK JP','Noto Sans JP','Hiragino Sans','Yu Gothic','Meiryo','IPAGothic',sans-serif">
-<rect width="960" height="1226" fill="#ffffff"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="1414" viewBox="0 0 960 1414" font-family="'Noto Sans CJK JP','Noto Sans JP','Hiragino Sans','Yu Gothic','Meiryo','IPAGothic',sans-serif">
+<rect width="960" height="1414" fill="#ffffff"/>
 <rect x="0" y="0" width="960" height="96" fill="#1e3a8a"/>
 <text x="40" y="36" font-size="15" fill="#c7d2fe">LLM Internals 計算例題集 ・ 第1章 トークナイズと BPE</text>
 <text x="40" y="74" font-size="28" font-weight="700" fill="#ffffff">例題 01-1　BPE のマージを手計算する</text>
-<rect x="40" y="120" width="880" height="246" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/><rect x="40" y="120" width="6" height="246" rx="3" fill="#2563eb"/><text x="64" y="152" font-size="20" font-weight="700" fill="#2563eb">問題</text>
-<text x="64" y="187" font-size="17" fill="#1f2937" xml:space="preserve">次のコーパス（単語: 出現回数）で BPE（Byte Pair Encoding）を学習する。</text>
-<rect x="72" y="200" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="100.0" y="220" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">hug</text>
-<rect x="128" y="200" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="156.0" y="220" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">pug</text>
-<rect x="184" y="200" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="212.0" y="220" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">pun</text>
-<rect x="240" y="200" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="268.0" y="220" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">bun</text>
-<rect x="296" y="200" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="324.0" y="220" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">hugs</text>
-<rect x="72" y="230" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="100.0" y="250" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">10</text>
-<rect x="128" y="230" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="156.0" y="250" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">5</text>
-<rect x="184" y="230" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="212.0" y="250" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">12</text>
-<rect x="240" y="230" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="268.0" y="250" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">4</text>
-<rect x="296" y="230" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="324.0" y="250" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">5</text>
-<text x="64" y="291" font-size="17" fill="#1f2937" xml:space="preserve">初期語彙は文字 {b, g, h, n, p, s, u} とする。</text>
-<text x="64" y="319" font-size="17" fill="#1f2937" xml:space="preserve">(1) 最初の 3 回のマージで作られるトークンを順に答えよ。</text>
-<text x="64" y="347" font-size="17" fill="#1f2937" xml:space="preserve">(2) 学習後、未知語 <tspan font-weight="700" fill="#b91c1c">&quot;bugs&quot;</tspan> と <tspan font-weight="700" fill="#b91c1c">&quot;mug&quot;</tspan> はどうトークン化されるか。</text>
-<rect x="40" y="384" width="880" height="568" rx="10" fill="#fffbeb" stroke="#d97706" stroke-width="1.5"/><rect x="40" y="384" width="6" height="568" rx="3" fill="#d97706"/><text x="64" y="416" font-size="20" font-weight="700" fill="#d97706">解説</text>
-<text x="64" y="455" font-size="17" font-weight="700" fill="#d97706">Step 1: 隣り合う文字ペアの出現回数を数える</text>
-<text x="64" y="483" font-size="17" fill="#1f2937" xml:space="preserve">各単語を文字に分け、ペアごとに「その単語の出現回数」を足し合わせる。</text>
-<rect x="64" y="494" width="836" height="26" rx="4" fill="#f3f4f6"/>
-<text x="76" y="513" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">u g : hug 10 + pug 5 + hugs 5 = <tspan font-weight="700" fill="#b91c1c">20</tspan>  ← 最多</text>
-<rect x="64" y="524" width="836" height="26" rx="4" fill="#f3f4f6"/>
-<text x="76" y="543" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">p u : pun 12 + pug 5 = 17　　u n : pun 12 + bun 4 = 16</text>
-<rect x="64" y="554" width="836" height="26" rx="4" fill="#f3f4f6"/>
-<text x="76" y="573" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">h u : hug 10 + hugs 5 = 15　g s : 5　　b u : 4</text>
-<text x="64" y="601" font-size="17" fill="#1f2937" xml:space="preserve">→ 1 回目のマージは <tspan font-weight="700" fill="#b91c1c">u + g → &quot;ug&quot;</tspan></text>
-<text x="64" y="633" font-size="17" font-weight="700" fill="#d97706">Step 2: &quot;ug&quot; を 1 つの記号として数え直す</text>
-<rect x="64" y="644" width="836" height="26" rx="4" fill="#f3f4f6"/>
-<text x="76" y="663" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">h ug, p ug, p u n, b u n, h ug s</text>
-<rect x="64" y="674" width="836" height="26" rx="4" fill="#f3f4f6"/>
-<text x="76" y="693" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">u n : 12 + 4 = <tspan font-weight="700" fill="#b91c1c">16</tspan>　h ug : 15　p u : 12　p ug : 5　ug s : 5</text>
-<text x="64" y="721" font-size="17" fill="#1f2937" xml:space="preserve">→ 2 回目のマージは <tspan font-weight="700" fill="#b91c1c">u + n → &quot;un&quot;</tspan></text>
-<text x="64" y="753" font-size="17" font-weight="700" fill="#d97706">Step 3: もう一度数え直す</text>
-<rect x="64" y="764" width="836" height="26" rx="4" fill="#f3f4f6"/>
-<text x="76" y="783" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">h ug, p ug, p un, b un, h ug s</text>
-<rect x="64" y="794" width="836" height="26" rx="4" fill="#f3f4f6"/>
-<text x="76" y="813" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">h ug : <tspan font-weight="700" fill="#b91c1c">15</tspan>　p un : 12　p ug : 5　ug s : 5　b un : 4</text>
-<text x="64" y="841" font-size="17" fill="#1f2937" xml:space="preserve">→ 3 回目のマージは <tspan font-weight="700" fill="#b91c1c">h + ug → &quot;hug&quot;</tspan></text>
-<text x="64" y="873" font-size="17" font-weight="700" fill="#d97706">Step 4: 新しい単語は「学習した順」にマージを適用する</text>
-<rect x="64" y="884" width="836" height="26" rx="4" fill="#f3f4f6"/>
-<text x="76" y="903" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">bugs : b u g s → (u+g) b ug s → これ以上適用できない</text>
-<rect x="64" y="914" width="836" height="26" rx="4" fill="#f3f4f6"/>
-<text x="76" y="933" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">mug  : m u g   → (u+g) m ug   → &quot;m&quot; は語彙にない → [UNK]</text>
-<rect x="40" y="970" width="880" height="114" rx="10" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/><rect x="40" y="970" width="6" height="114" rx="3" fill="#059669"/><text x="64" y="1002" font-size="20" font-weight="700" fill="#059669">解答</text>
-<text x="64" y="1037" font-size="17" fill="#1f2937" xml:space="preserve">(1) ① <tspan font-weight="700" fill="#b91c1c">ug</tspan> (20回)　② <tspan font-weight="700" fill="#b91c1c">un</tspan> (16回)　③ <tspan font-weight="700" fill="#b91c1c">hug</tspan> (15回)</text>
-<text x="64" y="1065" font-size="17" fill="#1f2937" xml:space="preserve">(2) &quot;bugs&quot; → <tspan font-weight="700" fill="#b91c1c">[b, ug, s]</tspan>　/　&quot;mug&quot; → <tspan font-weight="700" fill="#b91c1c">[[UNK], ug]</tspan></text>
-<rect x="40" y="1102" width="880" height="76" rx="10" fill="#f5f3ff"/>
-<text x="60" y="1133" font-size="17" fill="#7c3aed" xml:space="preserve">★ BPE は「最も頻出するペアを 1 つにまとめる」を繰り返すだけ。</text>
-<text x="60" y="1161" font-size="17" fill="#7c3aed" xml:space="preserve">　 実用の Byte-level BPE は 256 種のバイトを初期語彙にするので [UNK] が出ない。</text>
-<text x="920" y="1212" font-size="12" text-anchor="end" fill="#6b7280">参考: github.com/amitshekhariitbhu/llm-internals</text>
+<rect x="40" y="120" width="880" height="170" rx="10" fill="#f0fdfa" stroke="#0f766e" stroke-width="1.5"/><rect x="40" y="120" width="6" height="170" rx="3" fill="#0f766e"/><text x="64" y="152" font-size="20" font-weight="700" fill="#0f766e">これは何？ 何に使う？</text>
+<text x="64" y="187" font-size="17" font-weight="700" fill="#b91c1c">何か</text>
+<text x="164" y="187" font-size="17" fill="#1f2937" xml:space="preserve">テキストをトークンに分ける方法の 1 つ。よく一緒に出てくる文字のペアを</text>
+<text x="164" y="215" font-size="17" fill="#1f2937" xml:space="preserve">繰り返しくっつけて、語彙（トークンの一覧）を作る。</text>
+<text x="64" y="243" font-size="17" font-weight="700" fill="#b91c1c">何のため</text>
+<text x="164" y="243" font-size="17" fill="#1f2937" xml:space="preserve">語彙サイズを抑えながら、知らない単語も知っている部品に分解して扱うため。</text>
+<text x="164" y="271" font-size="17" fill="#1f2937" xml:space="preserve">GPT や Llama などほとんどの LLM が BPE 系のトークナイザを使っている。</text>
+<rect x="40" y="308" width="880" height="246" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/><rect x="40" y="308" width="6" height="246" rx="3" fill="#2563eb"/><text x="64" y="340" font-size="20" font-weight="700" fill="#2563eb">問題</text>
+<text x="64" y="375" font-size="17" fill="#1f2937" xml:space="preserve">次のコーパス（単語: 出現回数）で BPE（Byte Pair Encoding）を学習する。</text>
+<rect x="72" y="388" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="100.0" y="408" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">hug</text>
+<rect x="128" y="388" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="156.0" y="408" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">pug</text>
+<rect x="184" y="388" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="212.0" y="408" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">pun</text>
+<rect x="240" y="388" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="268.0" y="408" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">bun</text>
+<rect x="296" y="388" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="324.0" y="408" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">hugs</text>
+<rect x="72" y="418" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="100.0" y="438" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">10</text>
+<rect x="128" y="418" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="156.0" y="438" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">5</text>
+<rect x="184" y="418" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="212.0" y="438" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">12</text>
+<rect x="240" y="418" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="268.0" y="438" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">4</text>
+<rect x="296" y="418" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="324.0" y="438" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">5</text>
+<text x="64" y="479" font-size="17" fill="#1f2937" xml:space="preserve">初期語彙は文字 {b, g, h, n, p, s, u} とする。</text>
+<text x="64" y="507" font-size="17" fill="#1f2937" xml:space="preserve">(1) 最初の 3 回のマージで作られるトークンを順に答えよ。</text>
+<text x="64" y="535" font-size="17" fill="#1f2937" xml:space="preserve">(2) 学習後、未知語 <tspan font-weight="700" fill="#b91c1c">&quot;bugs&quot;</tspan> と <tspan font-weight="700" fill="#b91c1c">&quot;mug&quot;</tspan> はどうトークン化されるか。</text>
+<rect x="40" y="572" width="880" height="568" rx="10" fill="#fffbeb" stroke="#d97706" stroke-width="1.5"/><rect x="40" y="572" width="6" height="568" rx="3" fill="#d97706"/><text x="64" y="604" font-size="20" font-weight="700" fill="#d97706">解説</text>
+<text x="64" y="643" font-size="17" font-weight="700" fill="#d97706">Step 1: 隣り合う文字ペアの出現回数を数える</text>
+<text x="64" y="671" font-size="17" fill="#1f2937" xml:space="preserve">各単語を文字に分け、ペアごとに「その単語の出現回数」を足し合わせる。</text>
+<rect x="64" y="682" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="701" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">u g : hug 10 + pug 5 + hugs 5 = <tspan font-weight="700" fill="#b91c1c">20</tspan>  ← 最多</text>
+<rect x="64" y="712" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="731" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">p u : pun 12 + pug 5 = 17　　u n : pun 12 + bun 4 = 16</text>
+<rect x="64" y="742" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="761" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">h u : hug 10 + hugs 5 = 15　g s : 5　　b u : 4</text>
+<text x="64" y="789" font-size="17" fill="#1f2937" xml:space="preserve">→ 1 回目のマージは <tspan font-weight="700" fill="#b91c1c">u + g → &quot;ug&quot;</tspan></text>
+<text x="64" y="821" font-size="17" font-weight="700" fill="#d97706">Step 2: &quot;ug&quot; を 1 つの記号として数え直す</text>
+<rect x="64" y="832" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="851" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">h ug, p ug, p u n, b u n, h ug s</text>
+<rect x="64" y="862" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="881" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">u n : 12 + 4 = <tspan font-weight="700" fill="#b91c1c">16</tspan>　h ug : 15　p u : 12　p ug : 5　ug s : 5</text>
+<text x="64" y="909" font-size="17" fill="#1f2937" xml:space="preserve">→ 2 回目のマージは <tspan font-weight="700" fill="#b91c1c">u + n → &quot;un&quot;</tspan></text>
+<text x="64" y="941" font-size="17" font-weight="700" fill="#d97706">Step 3: もう一度数え直す</text>
+<rect x="64" y="952" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="971" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">h ug, p ug, p un, b un, h ug s</text>
+<rect x="64" y="982" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="1001" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">h ug : <tspan font-weight="700" fill="#b91c1c">15</tspan>　p un : 12　p ug : 5　ug s : 5　b un : 4</text>
+<text x="64" y="1029" font-size="17" fill="#1f2937" xml:space="preserve">→ 3 回目のマージは <tspan font-weight="700" fill="#b91c1c">h + ug → &quot;hug&quot;</tspan></text>
+<text x="64" y="1061" font-size="17" font-weight="700" fill="#d97706">Step 4: 新しい単語は「学習した順」にマージを適用する</text>
+<rect x="64" y="1072" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="1091" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">bugs : b u g s → (u+g) b ug s → これ以上適用できない</text>
+<rect x="64" y="1102" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="1121" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">mug  : m u g   → (u+g) m ug   → &quot;m&quot; は語彙にない → [UNK]</text>
+<rect x="40" y="1158" width="880" height="114" rx="10" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/><rect x="40" y="1158" width="6" height="114" rx="3" fill="#059669"/><text x="64" y="1190" font-size="20" font-weight="700" fill="#059669">解答</text>
+<text x="64" y="1225" font-size="17" fill="#1f2937" xml:space="preserve">(1) ① <tspan font-weight="700" fill="#b91c1c">ug</tspan> (20回)　② <tspan font-weight="700" fill="#b91c1c">un</tspan> (16回)　③ <tspan font-weight="700" fill="#b91c1c">hug</tspan> (15回)</text>
+<text x="64" y="1253" font-size="17" fill="#1f2937" xml:space="preserve">(2) &quot;bugs&quot; → <tspan font-weight="700" fill="#b91c1c">[b, ug, s]</tspan>　/　&quot;mug&quot; → <tspan font-weight="700" fill="#b91c1c">[[UNK], ug]</tspan></text>
+<rect x="40" y="1290" width="880" height="76" rx="10" fill="#f5f3ff"/>
+<text x="60" y="1321" font-size="17" fill="#7c3aed" xml:space="preserve">★ BPE は「最も頻出するペアを 1 つにまとめる」を繰り返すだけ。</text>
+<text x="60" y="1349" font-size="17" fill="#7c3aed" xml:space="preserve">　 実用の Byte-level BPE は 256 種のバイトを初期語彙にするので [UNK] が出ない。</text>
+<text x="920" y="1400" font-size="12" text-anchor="end" fill="#6b7280">参考: github.com/amitshekhariitbhu/llm-internals</text>
 </svg>

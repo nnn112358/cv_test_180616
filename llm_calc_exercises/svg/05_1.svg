@@ -1,40 +1,46 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="960" height="902" viewBox="0 0 960 902" font-family="'Noto Sans CJK JP','Noto Sans JP','Hiragino Sans','Yu Gothic','Meiryo','IPAGothic',sans-serif">
-<rect width="960" height="902" fill="#ffffff"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="1062" viewBox="0 0 960 1062" font-family="'Noto Sans CJK JP','Noto Sans JP','Hiragino Sans','Yu Gothic','Meiryo','IPAGothic',sans-serif">
+<rect width="960" height="1062" fill="#ffffff"/>
 <rect x="0" y="0" width="960" height="96" fill="#1e3a8a"/>
 <text x="40" y="36" font-size="15" fill="#c7d2fe">LLM Internals 計算例題集 ・ 第5章 クロスエントロピー損失</text>
 <text x="40" y="74" font-size="28" font-weight="700" fill="#ffffff">例題 05-1　多クラスのクロスエントロピーを計算する</text>
-<rect x="40" y="120" width="880" height="246" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/><rect x="40" y="120" width="6" height="246" rx="3" fill="#2563eb"/><text x="64" y="152" font-size="20" font-weight="700" fill="#2563eb">問題</text>
-<text x="64" y="187" font-size="17" fill="#1f2937" xml:space="preserve">3 クラス分類（猫・犬・鳥）で、モデルの出力確率が次のようになった。</text>
-<rect x="72" y="200" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="100.0" y="220" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">猫</text>
-<rect x="128" y="200" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="156.0" y="220" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">犬</text>
-<rect x="184" y="200" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="212.0" y="220" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">鳥</text>
-<rect x="72" y="230" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="100.0" y="250" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0.7</text>
-<rect x="128" y="230" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="156.0" y="250" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0.2</text>
-<rect x="184" y="230" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
-<text x="212.0" y="250" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0.1</text>
-<text x="64" y="291" font-size="17" fill="#1f2937" xml:space="preserve">(1) 正解が「猫」のときの損失 L を求めよ。</text>
-<text x="64" y="319" font-size="17" fill="#1f2937" xml:space="preserve">(2) 正解が「鳥」のときの損失 L を求めよ。</text>
-<text x="64" y="347" font-size="17" fill="#1f2937" xml:space="preserve">（ln 0.7 = −0.357、ln 0.1 = −2.303 を使ってよい）</text>
-<rect x="40" y="384" width="880" height="300" rx="10" fill="#fffbeb" stroke="#d97706" stroke-width="1.5"/><rect x="40" y="384" width="6" height="300" rx="3" fill="#d97706"/><text x="64" y="416" font-size="20" font-weight="700" fill="#d97706">解説</text>
-<text x="64" y="455" font-size="17" font-weight="700" fill="#d97706">クロスエントロピーの式</text>
-<rect x="64" y="466" width="836" height="26" rx="4" fill="#f3f4f6"/>
-<text x="76" y="485" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">L = − Σ_c y_c · ln p_c   （y は正解が 1、それ以外が 0 の one-hot）</text>
-<text x="64" y="513" font-size="17" fill="#1f2937" xml:space="preserve">正解以外の項は y_c = 0 で消えるので、<tspan font-weight="700" fill="#b91c1c">L = −ln(正解クラスの確率)</tspan> だけが残る。</text>
-<text x="64" y="545" font-size="17" font-weight="700" fill="#d97706">(1) 正解 = 猫（y = (1, 0, 0)）</text>
-<rect x="64" y="556" width="836" height="26" rx="4" fill="#f3f4f6"/>
-<text x="76" y="575" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">L = −(1·ln 0.7 + 0·ln 0.2 + 0·ln 0.1) = −ln 0.7 = 0.357</text>
-<text x="64" y="607" font-size="17" font-weight="700" fill="#d97706">(2) 正解 = 鳥（y = (0, 0, 1)）</text>
-<rect x="64" y="618" width="836" height="26" rx="4" fill="#f3f4f6"/>
-<text x="76" y="637" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">L = −ln 0.1 = 2.303</text>
-<text x="64" y="665" font-size="17" fill="#1f2937" xml:space="preserve">正解に低い確率しか付けていないので、損失は約 6.5 倍に跳ね上がる。</text>
-<rect x="40" y="702" width="880" height="86" rx="10" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/><rect x="40" y="702" width="6" height="86" rx="3" fill="#059669"/><text x="64" y="734" font-size="20" font-weight="700" fill="#059669">解答</text>
-<text x="64" y="769" font-size="17" fill="#1f2937" xml:space="preserve">(1) <tspan font-weight="700" fill="#b91c1c">L ≈ 0.357</tspan>　(2) <tspan font-weight="700" fill="#b91c1c">L ≈ 2.303</tspan></text>
-<rect x="40" y="806" width="880" height="48" rx="10" fill="#f5f3ff"/>
-<text x="60" y="837" font-size="17" fill="#7c3aed" xml:space="preserve">★ −ln p は p → 1 で 0、p → 0 で ∞。「自信満々に間違える」ほど強く罰する。</text>
-<text x="920" y="888" font-size="12" text-anchor="end" fill="#6b7280">参考: github.com/amitshekhariitbhu/llm-internals</text>
+<rect x="40" y="120" width="880" height="142" rx="10" fill="#f0fdfa" stroke="#0f766e" stroke-width="1.5"/><rect x="40" y="120" width="6" height="142" rx="3" fill="#0f766e"/><text x="64" y="152" font-size="20" font-weight="700" fill="#0f766e">これは何？ 何に使う？</text>
+<text x="64" y="187" font-size="17" font-weight="700" fill="#b91c1c">何か</text>
+<text x="164" y="187" font-size="17" fill="#1f2937" xml:space="preserve">モデルの予測確率と正解との「ずれ」を測る損失関数。</text>
+<text x="64" y="215" font-size="17" font-weight="700" fill="#b91c1c">何のため</text>
+<text x="164" y="215" font-size="17" fill="#1f2937" xml:space="preserve">分類や次トークン予測の学習で、正解の確率が上がる方向にモデルを</text>
+<text x="164" y="243" font-size="17" fill="#1f2937" xml:space="preserve">更新するため。LLM の事前学習の損失はこれ 1 つ。</text>
+<rect x="40" y="280" width="880" height="246" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/><rect x="40" y="280" width="6" height="246" rx="3" fill="#2563eb"/><text x="64" y="312" font-size="20" font-weight="700" fill="#2563eb">問題</text>
+<text x="64" y="347" font-size="17" fill="#1f2937" xml:space="preserve">3 クラス分類（猫・犬・鳥）で、モデルの出力確率が次のようになった。</text>
+<rect x="72" y="360" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="100.0" y="380" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">猫</text>
+<rect x="128" y="360" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="156.0" y="380" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">犬</text>
+<rect x="184" y="360" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="212.0" y="380" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">鳥</text>
+<rect x="72" y="390" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="100.0" y="410" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0.7</text>
+<rect x="128" y="390" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="156.0" y="410" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0.2</text>
+<rect x="184" y="390" width="56" height="30" fill="#ffffff" stroke="#94a3b8"/>
+<text x="212.0" y="410" text-anchor="middle" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="15" fill="#1f2937">0.1</text>
+<text x="64" y="451" font-size="17" fill="#1f2937" xml:space="preserve">(1) 正解が「猫」のときの損失 L を求めよ。</text>
+<text x="64" y="479" font-size="17" fill="#1f2937" xml:space="preserve">(2) 正解が「鳥」のときの損失 L を求めよ。</text>
+<text x="64" y="507" font-size="17" fill="#1f2937" xml:space="preserve">（ln 0.7 = −0.357、ln 0.1 = −2.303 を使ってよい）</text>
+<rect x="40" y="544" width="880" height="300" rx="10" fill="#fffbeb" stroke="#d97706" stroke-width="1.5"/><rect x="40" y="544" width="6" height="300" rx="3" fill="#d97706"/><text x="64" y="576" font-size="20" font-weight="700" fill="#d97706">解説</text>
+<text x="64" y="615" font-size="17" font-weight="700" fill="#d97706">クロスエントロピーの式</text>
+<rect x="64" y="626" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="645" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">L = − Σ_c y_c · ln p_c   （y は正解が 1、それ以外が 0 の one-hot）</text>
+<text x="64" y="673" font-size="17" fill="#1f2937" xml:space="preserve">正解以外の項は y_c = 0 で消えるので、<tspan font-weight="700" fill="#b91c1c">L = −ln(正解クラスの確率)</tspan> だけが残る。</text>
+<text x="64" y="705" font-size="17" font-weight="700" fill="#d97706">(1) 正解 = 猫（y = (1, 0, 0)）</text>
+<rect x="64" y="716" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="735" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">L = −(1·ln 0.7 + 0·ln 0.2 + 0·ln 0.1) = −ln 0.7 = 0.357</text>
+<text x="64" y="767" font-size="17" font-weight="700" fill="#d97706">(2) 正解 = 鳥（y = (0, 0, 1)）</text>
+<rect x="64" y="778" width="836" height="26" rx="4" fill="#f3f4f6"/>
+<text x="76" y="797" font-family="'DejaVu Sans Mono','Menlo','Consolas','Noto Sans Mono CJK JP','IPAGothic',monospace" font-size="16" fill="#1f2937" xml:space="preserve">L = −ln 0.1 = 2.303</text>
+<text x="64" y="825" font-size="17" fill="#1f2937" xml:space="preserve">正解に低い確率しか付けていないので、損失は約 6.5 倍に跳ね上がる。</text>
+<rect x="40" y="862" width="880" height="86" rx="10" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/><rect x="40" y="862" width="6" height="86" rx="3" fill="#059669"/><text x="64" y="894" font-size="20" font-weight="700" fill="#059669">解答</text>
+<text x="64" y="929" font-size="17" fill="#1f2937" xml:space="preserve">(1) <tspan font-weight="700" fill="#b91c1c">L ≈ 0.357</tspan>　(2) <tspan font-weight="700" fill="#b91c1c">L ≈ 2.303</tspan></text>
+<rect x="40" y="966" width="880" height="48" rx="10" fill="#f5f3ff"/>
+<text x="60" y="997" font-size="17" fill="#7c3aed" xml:space="preserve">★ −ln p は p → 1 で 0、p → 0 で ∞。「自信満々に間違える」ほど強く罰する。</text>
+<text x="920" y="1048" font-size="12" text-anchor="end" fill="#6b7280">参考: github.com/amitshekhariitbhu/llm-internals</text>
 </svg>

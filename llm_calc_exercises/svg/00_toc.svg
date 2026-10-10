@@ -2,7 +2,7 @@
 <rect width="1200" height="1438" fill="#ffffff"/>
 <rect width="1200" height="110" fill="#1e3a8a"/>
 <text x="40" y="58" font-size="34" font-weight="700" fill="#ffffff">LLM Internals 計算例題集 — 目次</text>
-<text x="40" y="92" font-size="17" fill="#c7d2fe">参考: github.com/amitshekhariitbhu/llm-internals ・ 全 24 章 / 50 問 ・ 各問題に「問題 → 解説 → 解答」</text>
+<text x="40" y="92" font-size="17" fill="#c7d2fe">参考: github.com/amitshekhariitbhu/llm-internals ・ 全 24 章 / 50 問 ・ 各問題に「概要 → 問題 → 解説 → 解答」</text>
 <rect x="40.0" y="128" width="540.0" height="30" rx="6" fill="#e0e7ff"/>
 <text x="50.0" y="150" font-size="18" font-weight="700" fill="#1e3a8a">01  トークナイズと BPE</text>
 <text x="570.0" y="150" font-size="12" fill="#6366f1" text-anchor="end">Tokenization / Byte Pair Encoding</text>

@@ -1,7 +1,7 @@
 # LLM Internals 計算例題集 — 目次
 
 [amitshekhariitbhu/llm-internals](https://github.com/amitshekhariitbhu/llm-internals) の内容をもとにした計算問題です。
-各問題は 1 枚の SVG（`問題 → 解説 → 解答`）にまとめます。
+各問題は 1 枚の SVG（`これは何？何に使う？ → 問題 → 解説 → 解答`）にまとめます。
 
 凡例: ⬜ 未作成 / ✅ 作成済み
 
