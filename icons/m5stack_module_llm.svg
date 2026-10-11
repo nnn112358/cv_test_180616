@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="glare" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity="0.35"/><stop offset="0.4" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="scr" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#5e5e5e"/><stop offset="1" stop-color="#383838"/>
+    </linearGradient>
+    <linearGradient id="gray" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#b9b9b9"/><stop offset="1" stop-color="#8a8a8a"/>
+    </linearGradient>
+    <linearGradient id="whitebtn" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#d4d4d4"/>
+    </linearGradient>
+    <radialGradient id="led" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#bfe8ff"/><stop offset="0.45" stop-color="#3a9ad9" stop-opacity="0.55"/><stop offset="1" stop-color="#3a9ad9" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect x="96" y="96" width="320" height="320" rx="26" fill="none" stroke="#2b2b2b" stroke-width="22" stroke-linejoin="round"/>
+  <rect x="96" y="96" width="320" height="320" rx="26" fill="none" stroke="#fff" stroke-width="16" stroke-linejoin="round"/>
+  <rect x="96" y="96" width="320" height="320" rx="26" fill="#7a7a7a"/>
+  <rect x="112" y="112" width="288" height="288" rx="14" fill="#141414"/>
+  <rect x="196" y="196" width="120" height="120" rx="10" fill="#2e2e2e" stroke="#555" stroke-width="3"/>
+  <text x="256" y="250" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="30" fill="#fff" text-anchor="middle">AX</text>
+  <text x="256" y="284" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="22" fill="#bbb" text-anchor="middle">630C</text>
+  <rect x="130" y="128" width="64" height="32" rx="6" fill="#fff"/>
+  <text x="162" y="152" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="22" fill="#141414" text-anchor="middle">LLM</text>
+  <rect x="360" y="136" width="10" height="10" fill="#d4a93c"/>
+  <rect x="360" y="156" width="10" height="10" fill="#d4a93c"/>
+  <rect x="360" y="176" width="10" height="10" fill="#d4a93c"/>
+  <rect x="360" y="196" width="10" height="10" fill="#d4a93c"/>
+  <rect x="360" y="216" width="10" height="10" fill="#d4a93c"/>
+  <rect x="360" y="236" width="10" height="10" fill="#d4a93c"/>
+  <rect x="360" y="256" width="10" height="10" fill="#d4a93c"/>
+  <rect x="360" y="276" width="10" height="10" fill="#d4a93c"/>
+  <rect x="360" y="296" width="10" height="10" fill="#d4a93c"/>
+  <rect x="360" y="316" width="10" height="10" fill="#d4a93c"/>
+  <rect x="360" y="336" width="10" height="10" fill="#d4a93c"/>
+  <rect x="360" y="356" width="10" height="10" fill="#d4a93c"/>
+  <rect x="360" y="376" width="10" height="10" fill="#d4a93c"/>
+  <rect x="378" y="136" width="10" height="10" fill="#d4a93c"/>
+  <rect x="378" y="156" width="10" height="10" fill="#d4a93c"/>
+  <rect x="378" y="176" width="10" height="10" fill="#d4a93c"/>
+  <rect x="378" y="196" width="10" height="10" fill="#d4a93c"/>
+  <rect x="378" y="216" width="10" height="10" fill="#d4a93c"/>
+  <rect x="378" y="236" width="10" height="10" fill="#d4a93c"/>
+  <rect x="378" y="256" width="10" height="10" fill="#d4a93c"/>
+  <rect x="378" y="276" width="10" height="10" fill="#d4a93c"/>
+  <rect x="378" y="296" width="10" height="10" fill="#d4a93c"/>
+  <rect x="378" y="316" width="10" height="10" fill="#d4a93c"/>
+  <rect x="378" y="336" width="10" height="10" fill="#d4a93c"/>
+  <rect x="378" y="356" width="10" height="10" fill="#d4a93c"/>
+  <rect x="378" y="376" width="10" height="10" fill="#d4a93c"/>
+  <rect x="126" y="330" width="40" height="52" rx="4" fill="#c9c9c9"/>
+  <circle cx="300" cy="150" r="10" fill="#e04848"/><circle cx="330" cy="150" r="10" fill="#3ddc6a"/>
+</svg>
