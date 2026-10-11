@@ -1,0 +1,410 @@
+<title>動くリッカチ方程式</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@600;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&family=STIX+Two+Text:ital,wght@0,400;1,400;1,600&display=swap">
+<style>
+/* Layout: one reading column (textbook page), each section = short prose + one live figure; equation terms carry a fixed color code across all figures */
+:root{
+  --bg:#f2f4f6; --surface:#ffffff; --ink:#172230; --muted:#5b6977; --line:#d3dae2; --grid:#e6ebf0;
+  --drift:#2d58cf; --ctrl:#c8741f; --cost:#14897b; --state:#b2385c;
+  --f-display:"Shippori Mincho B1","Hiragino Mincho ProN","Yu Mincho",serif;
+  --f-body:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",monospace;
+  --f-math:"STIX Two Text","Times New Roman",serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e141b; --surface:#151e28; --ink:#e4ebf2; --muted:#95a4b4; --line:#2a3846; --grid:#1d2834;
+  --drift:#7f9dff; --ctrl:#efa556; --cost:#3cc6b2; --state:#ff7b9f; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e141b; --surface:#151e28; --ink:#e4ebf2; --muted:#95a4b4; --line:#2a3846; --grid:#1d2834;
+  --drift:#7f9dff; --ctrl:#efa556; --cost:#3cc6b2; --state:#ff7b9f; color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.85;padding-inline:16px;padding-block:0 64px}
+.wrap{max-width:920px;margin:0 auto}
+header{padding-block:56px 24px;display:grid;gap:14px}
+.eyebrow{font-size:12.5px;letter-spacing:.14em;color:var(--muted);font-weight:500}
+h1{font-family:var(--f-display);font-weight:800;font-size:clamp(40px,8vw,72px);line-height:1.1;margin:0;text-wrap:balance;letter-spacing:.02em}
+.lede{max-width:40em;margin:0;color:var(--ink)}
+.eq{font-family:var(--f-math);font-size:clamp(22px,4.4vw,36px);line-height:1.4;padding-block:18px;overflow-x:auto;white-space:nowrap}
+.eq.small{font-size:clamp(17px,3.2vw,22px);padding-block:6px}
+.m{font-family:var(--f-math);font-style:italic;white-space:nowrap}
+.t-drift{color:var(--drift)} .t-ctrl{color:var(--ctrl)} .t-cost{color:var(--cost)} .t-state{color:var(--state)}
+.eq .term{display:inline-block;padding:0 .12em;border-bottom:3px solid currentColor;animation:pulse 6s infinite}
+.eq .term:nth-of-type(2){animation-delay:2s}.eq .term:nth-of-type(3){animation-delay:4s}
+@keyframes pulse{0%,30%,100%{border-bottom-color:transparent}5%,25%{border-bottom-color:currentColor}}
+.controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+button{font:inherit;font-size:14px;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:6px 16px;cursor:pointer}
+button:hover{border-color:var(--ink)} button:focus-visible,input:focus-visible{outline:2px solid var(--drift);outline-offset:2px}
+.hint{font-size:13px;color:var(--muted)}
+figure{margin:0;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px;display:grid;gap:10px}
+canvas{display:block;width:100%;max-width:100%}
+figcaption{font-size:14px;color:var(--muted);line-height:1.7}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--muted)}
+.legend span::before{content:"";display:inline-block;width:12px;height:3px;border-radius:2px;background:currentColor;margin-right:6px;vertical-align:middle}
+section{display:grid;grid-template-columns:56px minmax(0,1fr);gap:0 18px;padding-block:44px 8px;border-top:1px solid var(--line);margin-top:40px}
+.num{font-family:var(--f-display);font-weight:800;font-size:40px;line-height:1;color:var(--muted)}
+.body{display:grid;gap:16px;min-width:0}
+h2{font-family:var(--f-display);font-weight:800;font-size:clamp(24px,4vw,32px);line-height:1.3;margin:0;text-wrap:balance}
+p{margin:0;max-width:40em}
+.mat{display:inline-grid;grid-template-columns:repeat(2,auto);gap:0 .7em;padding:0 .35em;border-left:1.5px solid currentColor;border-right:1.5px solid currentColor;border-radius:4px;vertical-align:middle;line-height:1.25;font-style:normal;text-align:center}
+.mat.col{grid-template-columns:auto}
+.setup{display:flex;flex-wrap:wrap;gap:10px 28px;align-items:center;font-family:var(--f-math);font-size:19px;padding:12px 16px;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.setup small{font-family:var(--f-body);font-size:13px;color:var(--muted)}
+.cv-hero{aspect-ratio:16/8}
+.cv-carts{aspect-ratio:16/8}
+.cv-bal{aspect-ratio:16/8}
+.cv-sc{aspect-ratio:16/7.5}
+.cv-dre{aspect-ratio:16/8}
+.cv-lab{aspect-ratio:16/9}
+@media (max-width:600px){
+  section{grid-template-columns:minmax(0,1fr)} .num{font-size:28px;margin-bottom:8px}
+  .cv-hero{aspect-ratio:4/3}.cv-carts{aspect-ratio:3/4}.cv-bal,.cv-sc,.cv-dre{aspect-ratio:3/4}.cv-lab{aspect-ratio:3/4}
+}
+.lab{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);gap:14px}
+@media (max-width:600px){.lab{grid-template-columns:minmax(0,1fr)}}
+.lab label{display:grid;gap:4px;font-size:14px}
+.lab label b{font-family:var(--f-mono);font-weight:600;font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--drift)}
+.readout{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;font-family:var(--f-mono);font-size:14px;font-variant-numeric:tabular-nums}
+.readout div{display:grid;gap:2px}
+.readout em{font-family:var(--f-body);font-style:normal;font-size:12px;color:var(--muted);letter-spacing:.06em}
+.summary{display:grid;gap:12px;padding:0;margin:0;list-style:none}
+.summary li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:baseline}
+.summary li::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--c);transform:translateY(1px)}
+footer{margin-top:48px;font-size:13px;color:var(--muted)}
+@media (prefers-reduced-motion: reduce){.eq .term{animation:none}}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">制御工学 ・ 最適制御（LQR）</div>
+  <h1>リッカチ方程式</h1>
+  <p class="lede">「どれだけ早く目標に戻すか」と「どれだけ力を使うか」。この2つの釣り合いを、ひとつの行列 <span class="m">P</span> に閉じ込めたのがリッカチ方程式です。動く図で、何が釣り合っているのかを順番に見ていきます。</p>
+  <div class="eq" aria-label="代数リッカチ方程式">
+    <span class="term t-drift">A<sup>T</sup>P + PA</span>
+    <span class="term t-ctrl">− PBR<sup>−1</sup>B<sup>T</sup>P</span>
+    <span class="term t-cost">+ Q</span> = 0
+  </div>
+  <div class="legend"><span class="t-drift">放っておいたときの変化（ドリフト）</span><span class="t-ctrl">制御で減らせる分</span><span class="t-cost">払うコスト</span></div>
+  <figure>
+    <canvas id="hero" class="cv-hero" role="img" aria-label="位相平面で最適制御の軌道が等高線の楕円を下って原点に集まるアニメーション"></canvas>
+    <figcaption>横軸が位置 <span class="m">x</span>、縦軸が速度 <span class="m">v</span>。どこから出発しても、最適制御 <span class="m">u = −Kx</span> で原点（目標）へ戻ります。背景の楕円は <span class="m">V(x) = x<sup>T</sup>Px</span> の等高線で、軌道はこの「コストのお椀」を下っていきます。</figcaption>
+  </figure>
+  <div class="controls"><button id="play" type="button">一時停止</button><span class="hint">すべての図がループ再生されます</span></div>
+</header>
+
+<section>
+  <div class="num">1</div>
+  <div class="body">
+    <h2>何を最小にしたいのか</h2>
+    <p>例として、摩擦のないレールの上の台車を考えます。状態は位置と速度、入力 <span class="m">u</span> は台車を押す力です。</p>
+    <div class="setup">
+      <span>ẋ = Ax + Bu</span>
+      <span>A = <span class="mat"><span>0</span><span>1</span><span>0</span><span>0</span></span>,&nbsp; B = <span class="mat col"><span>0</span><span>1</span></span></span>
+      <small>x = (位置, 速度)<br>u = 力</small>
+    </div>
+    <p>評価するのは、ずれと力の「2乗の積分」です。<span class="m t-cost">Q</span> はずれに対する罰、<span class="m t-ctrl">R</span> は力の使いすぎに対する罰で、この2つの重みの比が制御の性格を決めます。</p>
+    <div class="eq small">J = ∫<sub>0</sub><sup>∞</sup> ( <span class="t-cost">x<sup>T</sup>Qx</span> + <span class="t-ctrl">u<sup>T</sup>Ru</span> ) dt &nbsp;→ 最小</div>
+    <figure>
+      <canvas id="carts" class="cv-carts" role="img" aria-label="入力の重み r が違う2台の台車が原点へ戻る様子と、累積コストのバー"></canvas>
+      <figcaption>どちらも同じ位置 2.5 m から出発し、それぞれの重みで最適な制御をしています。<span class="m">r</span> が小さいと大きな力で一気に戻り、<span class="m">r</span> が大きいと力を節約してゆっくり戻ります。右のバーは、コストのうち「ずれ」と「力」に払った分の累積です。</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <div class="num">2</div>
+  <div class="body">
+    <h2>方程式は「コストの収支」を表している</h2>
+    <p>状態 <span class="m">x</span> から出発したときの最小コストは、2次形式 <span class="m">V(x) = x<sup>T</sup>Px</span> で書けます。最適な入力は、このお椀を一番急に下る向き <span class="m">u = −R<sup>−1</sup>B<sup>T</sup>Px</span> です。</p>
+    <p>最適な軌道の上では、「お椀を下る速さ」と「その瞬間に払うコスト」がちょうど打ち消し合います。この打ち消し合いが、どの <span class="m">x</span> でも成り立つ条件を書き下すと、リッカチ方程式になります。</p>
+    <div class="eq small"><span class="t-drift">x<sup>T</sup>(A<sup>T</sup>P + PA)x</span> <span class="t-ctrl">− 2x<sup>T</sup>PBR<sup>−1</sup>B<sup>T</sup>Px</span> + <span class="t-cost">( x<sup>T</sup>Qx + u<sup>T</sup>Ru )</span> = 0</div>
+    <figure>
+      <canvas id="bal" class="cv-bal" role="img" aria-label="状態が動くあいだ、ドリフト項・制御項・コスト率のバーが常に釣り合う様子"></canvas>
+      <figcaption>左の点が軌道を進むあいだ、右の4本のバーの長さは刻々と変わります。それでも <span class="m">dV/dt</span> とコスト率は、いつも同じ長さで逆向きです。この「常にゼロ」がリッカチ方程式の中身です。</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <div class="num">3</div>
+  <div class="body">
+    <h2>1次元で見ると、ただの2次方程式</h2>
+    <p>状態が1つなら、<span class="m">P</span> は数 <span class="m">p</span> になり、リッカチ方程式は <span class="m">p</span> の2次方程式 <span class="m">2ap − b<sup>2</sup>p<sup>2</sup>/r + q = 0</span> です。根は2つありますが、意味があるのは正の根だけです。</p>
+    <p>終端から時間をさかのぼって <span class="m">p</span> を動かすと（次の節の微分形）、どこから始めても正の根に吸い寄せられます。だから、この根が「長い時間で見たときの答え」になります。</p>
+    <figure>
+      <canvas id="scal" class="cv-sc" role="img" aria-label="スカラーのリッカチ方程式の右辺の放物線と、p が安定な根へ流れていく様子"></canvas>
+      <figcaption>例は <span class="m">a = 0.5, b = 1, q = 1, r = 1</span> です。左は右辺 <span class="m">f(p)</span> の放物線で、<span class="m">f &gt; 0</span> なら <span class="m">p</span> は右へ、<span class="m">f &lt; 0</span> なら左へ動きます。右は、出発点の違う3つの <span class="m">p</span> がさかのぼり時間 <span class="m">τ</span> とともに <span class="m">p* = 1.618</span> に集まる様子です。</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <div class="num">4</div>
+  <div class="body">
+    <h2>終端から時間をさかのぼって解く</h2>
+    <p>終わりの時刻 <span class="m">T</span> がある問題では、<span class="m">P</span> は時間とともに変わり、微分形のリッカチ方程式に従います。終端条件 <span class="m">P(T)</span> から出発して、時間を逆向きに積分します。</p>
+    <div class="eq small">−Ṗ = <span class="t-drift">A<sup>T</sup>P + PA</span> <span class="t-ctrl">− PBR<sup>−1</sup>B<sup>T</sup>P</span> <span class="t-cost">+ Q</span>, &nbsp; P(T) = 0</div>
+    <p>さかのぼる時間が長くなると <span class="m">P(t)</span> は一定値に落ち着きます。その一定値が、冒頭の代数リッカチ方程式（Ṗ = 0 とおいた形）の解です。</p>
+    <figure>
+      <canvas id="dre" class="cv-dre" role="img" aria-label="P の3つの成分が終端時刻から時間をさかのぼって定常値に収束する様子と、等高線の楕円が縮む様子"></canvas>
+      <figcaption>左は <span class="m">P(t)</span> の成分です（<span class="m">Q = diag(1, 1), r = 0.5, T = 6</span>）。右は <span class="m">V(x) = 1</span> の楕円で、終端近くでは <span class="m">P</span> が小さく楕円は大きく広がります。さかのぼるにつれて縮み、破線の定常解の形に重なります。</figcaption>
+    </figure>
+    <div class="legend"><span class="t-drift">p₁₁</span><span class="t-cost">p₁₂</span><span class="t-state">p₂₂</span></div>
+  </div>
+</section>
+
+<section>
+  <div class="num">5</div>
+  <div class="body">
+    <h2>重みを変えて、解の変化を見る</h2>
+    <p>スライダーで <span class="m t-cost">Q</span> と <span class="m t-ctrl">R</span> を変えると、その場でリッカチ方程式を解き直し、ゲイン <span class="m">K = R<sup>−1</sup>B<sup>T</sup>P</span> と応答を描き直します。この台車の例では、解を式で書けます。</p>
+    <div class="eq small">p₁₂ = √(q₁r), &nbsp; p₂₂ = √(r(2p₁₂ + q₂)), &nbsp; p₁₁ = p₁₂p₂₂ / r</div>
+    <div class="lab">
+      <label for="q1">位置の重み q₁ <b id="q1v">1.00</b><input id="q1" type="range" min="-1" max="1" step="0.01" value="0"></label>
+      <label for="q2">速度の重み q₂ <b id="q2v">1.00</b><input id="q2" type="range" min="0" max="5" step="0.05" value="1"></label>
+      <label for="rr">入力の重み r <b id="rrv">0.50</b><input id="rr" type="range" min="-2" max="1" step="0.01" value="-0.301"></label>
+    </div>
+    <figure>
+      <canvas id="lab" class="cv-lab" role="img" aria-label="選んだ重みでの台車の動き、位置 x(t) と入力 u(t) のグラフ"></canvas>
+      <div class="readout">
+        <div><em>リッカチ方程式の解 P</em><span id="oP"></span></div>
+        <div><em>最適ゲイン K</em><span id="oK"></span></div>
+        <div><em>閉ループの極</em><span id="oPole"></span></div>
+        <div><em>最小コスト J = x₀ᵀPx₀</em><span id="oJ"></span></div>
+      </div>
+      <figcaption>出発点は位置 2 m、速度 0 です。<span class="m">r</span> を下げると力が大きく速い応答に、<span class="m">q₂</span> を上げると速度を嫌ってブレーキの効いた応答になります。この例では、重みをどう選んでも減衰比は 0.707 以上に保たれます。</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <div class="num">6</div>
+  <div class="body">
+    <h2>まとめ</h2>
+    <ul class="summary">
+      <li style="--c:var(--drift)"><span><span class="m">A<sup>T</sup>P + PA</span> は、入力がないときにシステム自身の動きで <span class="m">V</span> がどう変わるかを表します。</span></li>
+      <li style="--c:var(--ctrl)"><span><span class="m">−PBR<sup>−1</sup>B<sup>T</sup>P</span> は、最適な入力で <span class="m">V</span> をどれだけ減らせるかを表します。<span class="m">R</span> が大きいほど小さくなります。</span></li>
+      <li style="--c:var(--cost)"><span><span class="m">Q</span> は、ずれに払うコストの割合です。</span></li>
+      <li style="--c:var(--ink)"><span>この3つの和がゼロになる <span class="m">P</span> を求めれば、最適なフィードバック <span class="m">u = −R<sup>−1</sup>B<sup>T</sup>Px</span> がそのまま決まります。</span></li>
+    </ul>
+  </div>
+</section>
+
+<footer>図の数値は、すべてページ内で式から計算しています（RK4 による数値積分と、2重積分器での解析解）。</footer>
+</div>
+
+<script>
+(() => {
+const root = document.documentElement;
+const C = {};
+function readColors(){const s=getComputedStyle(root);['bg','surface','ink','muted','line','grid','drift','ctrl','cost','state'].forEach(k=>C[k]=s.getPropertyValue('--'+k).trim());}
+readColors();
+const UI='"Zen Kaku Gothic New","Hiragino Sans",sans-serif', MONO='"IBM Plex Mono",ui-monospace,monospace', MATH='"STIX Two Text","Times New Roman",serif';
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const fmt=(n,d=2)=>(Math.abs(n)<0.5*Math.pow(10,-d)?0:n).toFixed(d).replace('-','−');
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+
+// ---------- math ----------
+function lqr(q1,q2,r){const b=Math.sqrt(q1*r);const c=Math.sqrt(r*(2*b+q2));return {P:[b*c/r,b,c],K:[b/r,c/r]};}
+function sim(K,x0,v0,T,dt){const xs=[],vs=[],us=[];let x=x0,v=v0;const n=Math.round(T/dt);
+  const f=(x,v)=>[v,-(K[0]*x+K[1]*v)];
+  for(let i=0;i<=n;i++){xs.push(x);vs.push(v);us.push(-(K[0]*x+K[1]*v));
+    const k1=f(x,v),k2=f(x+dt/2*k1[0],v+dt/2*k1[1]),k3=f(x+dt/2*k2[0],v+dt/2*k2[1]),k4=f(x+dt*k3[0],v+dt*k3[1]);
+    x+=dt/6*(k1[0]+2*k2[0]+2*k3[0]+k4[0]);v+=dt/6*(k1[1]+2*k2[1]+2*k3[1]+k4[1]);}
+  return {xs,vs,us,dt,n};}
+function ellipsePath(ctx,P,L,map){const [a,b,c]=P;const m=(a+c)/2,d=Math.sqrt(((a-c)/2)**2+b*b);const l1=m+d,l2=m-d;if(l2<=1e-6)return false;
+  const th=0.5*Math.atan2(2*b,a-c),r1=Math.sqrt(L/l1),r2=Math.sqrt(L/l2);ctx.beginPath();
+  for(let i=0;i<=120;i++){const t=i/120*2*Math.PI,ex=r1*Math.cos(t),ey=r2*Math.sin(t);const [px,py]=map(ex*Math.cos(th)-ey*Math.sin(th),ex*Math.sin(th)+ey*Math.cos(th));i?ctx.lineTo(px,py):ctx.moveTo(px,py);}
+  ctx.closePath();return true;}
+
+// ---------- drawing helpers ----------
+function arrow(ctx,x0,y0,x1,y1,col,w=2.5){const ang=Math.atan2(y1-y0,x1-x0),len=Math.hypot(x1-x0,y1-y0);if(len<2)return;ctx.strokeStyle=col;ctx.fillStyle=col;ctx.lineWidth=w;ctx.beginPath();ctx.moveTo(x0,y0);ctx.lineTo(x1-Math.cos(ang)*7,y1-Math.sin(ang)*7);ctx.stroke();ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x1-Math.cos(ang-0.45)*10,y1-Math.sin(ang-0.45)*10);ctx.lineTo(x1-Math.cos(ang+0.45)*10,y1-Math.sin(ang+0.45)*10);ctx.closePath();ctx.fill();}
+function text(ctx,s,x,y,{font=UI,size=13,col=C.ink,align='left',base='alphabetic',weight=400}={}){ctx.font=`${weight} ${size}px ${font}`;ctx.fillStyle=col;ctx.textAlign=align;ctx.textBaseline=base;ctx.fillText(s,x,y);}
+function polyline(ctx,pts,col,w=2,alpha=1,dash=null){if(pts.length<2)return;ctx.save();ctx.globalAlpha=alpha;ctx.strokeStyle=col;ctx.lineWidth=w;ctx.lineJoin='round';ctx.lineCap='round';if(dash)ctx.setLineDash(dash);ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.stroke();ctx.restore();}
+function dot(ctx,x,y,r,col,hollow=false){ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);if(hollow){ctx.fillStyle=C.surface;ctx.fill();ctx.strokeStyle=col;ctx.lineWidth=2;ctx.stroke();}else{ctx.fillStyle=col;ctx.fill();}}
+// plot frame: box {x,y,w,h}, ranges -> mapper
+function frame(ctx,box,xr,yr,{xt=[],yt=[],xl='',yl='',zeroY=true,xfmt=v=>fmt(v,0),yfmt=v=>fmt(v,1)}={}){
+  const mx=v=>box.x+(v-xr[0])/(xr[1]-xr[0])*box.w, my=v=>box.y+box.h-(v-yr[0])/(yr[1]-yr[0])*box.h;
+  ctx.lineWidth=1;ctx.strokeStyle=C.grid;
+  xt.forEach(v=>{ctx.beginPath();ctx.moveTo(mx(v),box.y);ctx.lineTo(mx(v),box.y+box.h);ctx.stroke();text(ctx,xfmt(v),mx(v),box.y+box.h+14,{font:MONO,size:10.5,col:C.muted,align:'center'});});
+  yt.forEach(v=>{ctx.beginPath();ctx.moveTo(box.x,my(v));ctx.lineTo(box.x+box.w,my(v));ctx.stroke();text(ctx,yfmt(v),box.x-5,my(v)+3.5,{font:MONO,size:10.5,col:C.muted,align:'right'});});
+  ctx.strokeStyle=C.line;ctx.strokeRect(box.x+.5,box.y+.5,box.w-1,box.h-1);
+  if(zeroY&&yr[0]<0&&yr[1]>0){ctx.strokeStyle=C.muted;ctx.globalAlpha=.6;ctx.beginPath();ctx.moveTo(box.x,my(0));ctx.lineTo(box.x+box.w,my(0));ctx.stroke();ctx.globalAlpha=1;}
+  if(xl)text(ctx,xl,box.x+box.w,box.y+box.h+28,{size:12,col:C.muted,align:'right'});
+  if(yl)text(ctx,yl,box.x+6,box.y+15,{size:12,col:C.muted});
+  return {mx,my,map:(a,b)=>[mx(a),my(b)]};}
+// phase plane with equal scaling, returns mapper
+function phase(ctx,box,P,levels,halfX){const s=box.w/(2*halfX),cx=box.x+box.w/2,cy=box.y+box.h/2;const map=(x,v)=>[cx+x*s,cy-v*s];
+  ctx.save();ctx.beginPath();ctx.rect(box.x,box.y,box.w,box.h);ctx.clip();
+  for(let i=levels.length-1;i>=0;i--){if(ellipsePath(ctx,P,levels[i],map)){ctx.globalAlpha=.05;ctx.fillStyle=C.drift;ctx.fill();ctx.globalAlpha=.35;ctx.strokeStyle=C.drift;ctx.lineWidth=1;ctx.stroke();ctx.globalAlpha=1;}}
+  ctx.strokeStyle=C.muted;ctx.globalAlpha=.55;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(box.x,cy);ctx.lineTo(box.x+box.w,cy);ctx.moveTo(cx,box.y);ctx.lineTo(cx,box.y+box.h);ctx.stroke();ctx.globalAlpha=1;
+  ctx.restore();
+  text(ctx,'x（位置）',box.x+box.w-4,cy-6,{size:12,col:C.muted,align:'right'});
+  text(ctx,'v（速度）',cx+6,box.y+14,{size:12,col:C.muted});
+  return {map,s,clip(){ctx.save();ctx.beginPath();ctx.rect(box.x,box.y,box.w,box.h);ctx.clip();}};}
+
+// ---------- scene system ----------
+const scenes=[];let playing=!reduce,useRest=reduce,clock=0,last=null;
+function render(s){if(!s.w)return;const t=useRest?s.rest:clock;s.ctx.clearRect(0,0,s.w,s.h);s.draw(s.ctx,s.w,s.h,t);}
+function scene(id,rest,draw){const el=document.getElementById(id),ctx=el.getContext('2d');const s={el,ctx,w:0,h:0,draw,rest,visible:true};
+  const fit=()=>{const r=el.getBoundingClientRect(),dpr=Math.min(2,window.devicePixelRatio||1);s.w=r.width;s.h=r.height;el.width=Math.max(1,Math.round(r.width*dpr));el.height=Math.max(1,Math.round(r.height*dpr));ctx.setTransform(dpr,0,0,dpr,0,0);render(s);};
+  new ResizeObserver(fit).observe(el);new IntersectionObserver(es=>{s.visible=es[0].isIntersecting;}).observe(el);fit();scenes.push(s);return s;}
+const renderAll=()=>scenes.forEach(render);
+function loop(ts){if(last==null)last=ts;const dt=Math.min(.05,(ts-last)/1000);last=ts;if(playing){clock+=dt;scenes.forEach(s=>{if(s.visible)render(s);});}requestAnimationFrame(loop);}
+const btn=document.getElementById('play');
+const setBtn=()=>btn.textContent=playing?'一時停止':'再生';setBtn();
+btn.addEventListener('click',()=>{playing=!playing;if(playing)useRest=false;setBtn();renderAll();});
+const recolor=()=>{readColors();renderAll();};
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',recolor);
+new MutationObserver(recolor).observe(root,{attributes:true,attributeFilter:['data-theme']});
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(renderAll);
+
+// common problem: Q = diag(1,1), r = 0.5
+const BASE=lqr(1,1,0.5);
+const LEVELS=[0.4,1.2,2.5,4.5,7,10,13.5];
+
+// ---------- hero ----------
+const heroSims=[...Array(10)].map((_,i)=>{const a=i/10*2*Math.PI+0.35;return sim(BASE.K,2.75*Math.cos(a),1.55*Math.sin(a),7,0.02);});
+scene('hero',3.2,(ctx,w,h,t)=>{
+  const box={x:8,y:8,w:w-16,h:h-16};const halfX=w<500?2.6:3.6;const pp=phase(ctx,box,BASE.P,LEVELS,halfX);
+  const prog=clamp((t%7)/5.2,0,1);pp.clip();
+  heroSims.forEach(S=>{const pts=S.xs.map((x,i)=>pp.map(x,S.vs[i]));polyline(ctx,pts,C.ink,1.2,.16);
+    const k=Math.floor(prog*S.n);polyline(ctx,pts.slice(0,k+1),C.state,2.2,.9);const p=pts[k];dot(ctx,p[0],p[1],4.5,C.state);
+    if(k===0)dot(ctx,p[0],p[1],7,C.state,true);});
+  ctx.restore();
+  const o=pp.map(0,0);dot(ctx,o[0],o[1],5,C.cost);text(ctx,'目標',o[0]+8,o[1]+16,{size:12,col:C.cost,weight:700});
+});
+
+// ---------- 1: carts ----------
+const cartCases=[{r:0.05,label:'r = 0.05　力を惜しまない'},{r:5,label:'r = 5　力を節約する'}].map(c=>{const L=lqr(1,0,c.r);const S=sim(L.K,2.5,0,12,0.01);let jx=0,ju=0;const JX=[],JU=[];
+  for(let i=0;i<=S.n;i++){JX.push(jx);JU.push(ju);jx+=S.xs[i]**2*S.dt;ju+=c.r*S.us[i]**2*S.dt;}return Object.assign(c,L,{S,JX,JU});});
+const jMax=Math.max(...cartCases.map(c=>Math.max(c.JX[c.S.n],c.JU[c.S.n])));
+function drawCart(ctx,cx,ty,u,showU=true){const cw=46,ch=24;ctx.fillStyle=C.surface;ctx.strokeStyle=C.ink;ctx.lineWidth=1.6;ctx.beginPath();ctx.roundRect(cx-cw/2,ty-ch-8,cw,ch,4);ctx.fill();ctx.stroke();
+  dot(ctx,cx-13,ty-5,4.5,C.ink);dot(ctx,cx+13,ty-5,4.5,C.ink);
+  if(showU){const L=clamp(u*9,-130,130);if(Math.abs(L)>2){arrow(ctx,cx,ty-20,cx+L,ty-20,C.ctrl,3);}text(ctx,'u = '+fmt(u,1),cx+(L>=0?Math.max(L,0):Math.min(L,0))/2,ty-44,{font:MONO,size:11.5,col:C.ctrl,align:'center',weight:600});}}
+function track(ctx,x0,x1,ty,xr,ticks){const m=v=>x0+(v-xr[0])/(xr[1]-xr[0])*(x1-x0);ctx.strokeStyle=C.line;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x0,ty);ctx.lineTo(x1,ty);ctx.stroke();
+  ticks.forEach(v=>{ctx.strokeStyle=C.line;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(m(v),ty);ctx.lineTo(m(v),ty+5);ctx.stroke();text(ctx,fmt(v,0)+' m',m(v),ty+18,{font:MONO,size:10.5,col:C.muted,align:'center'});});
+  ctx.save();ctx.setLineDash([4,4]);ctx.strokeStyle=C.cost;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(m(0),ty-62);ctx.lineTo(m(0),ty);ctx.stroke();ctx.restore();
+  text(ctx,'目標',m(0)+5,ty-54,{size:11.5,col:C.cost,weight:700});return m;}
+scene('carts',4,(ctx,w,h,t)=>{
+  const narrow=w<520;const ts=Math.min(12,(t%9.5)*1.6);
+  cartCases.forEach((c,i)=>{const y0=i*h/2,lh=h/2;const S=c.S,k=Math.min(S.n,Math.round(ts/S.dt));
+    text(ctx,c.label,14,y0+22,{size:13.5,weight:700});
+    const tx1=narrow?w-18:w*0.6, ty=y0+(narrow?lh*0.5:lh*0.7);
+    const m=track(ctx,18,tx1,ty,[-0.6,3],[0,1,2,3]);drawCart(ctx,m(S.xs[k]),ty,S.us[k]);
+    // meters
+    const mx0=narrow?18:w*0.66, mw=narrow?w-36:w*0.34-18, my0=narrow?ty+36:y0+lh*0.32;
+    const bars=[['ずれのコスト ∫x² dt',c.JX[k],C.cost],['力のコスト ∫r·u² dt',c.JU[k],C.ctrl]];
+    bars.forEach(([lab,val,col],j)=>{const yy=my0+j*34;text(ctx,lab,mx0,yy,{size:12,col:C.muted});ctx.fillStyle=C.grid;ctx.fillRect(mx0,yy+5,mw,9);ctx.fillStyle=col;ctx.fillRect(mx0,yy+5,mw*val/jMax,9);text(ctx,fmt(val,2),mx0+mw,yy,{font:MONO,size:11.5,col:col,align:'right',weight:600});});
+    text(ctx,'合計 J = '+fmt(c.JX[k]+c.JU[k],2),mx0+mw,my0+76,{font:MONO,size:12,col:C.ink,align:'right',weight:600});
+    if(i===0){ctx.strokeStyle=C.line;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(10,h/2);ctx.lineTo(w-10,h/2);ctx.stroke();}
+  });
+  text(ctx,'t = '+fmt(ts,1)+' s',w-14,22,{font:MONO,size:12,col:C.muted,align:'right'});
+});
+
+// ---------- 2: balance ----------
+const balSim=sim(BASE.K,-2.4,1.3,7,0.01);
+const [Pa,Pb,Pc]=BASE.P,Rr=0.5;
+const balVals=balSim.xs.map((x,i)=>{const v=balSim.vs[i];const s=Pb*x+Pc*v;const d1=2*(Pa*x*v+Pb*v*v),d2=-2*s*s/Rr,cost=x*x+v*v+s*s/Rr;return {d1,d2,dv:d1+d2,cost};});
+const balMax=Math.max(...balVals.map(o=>Math.max(Math.abs(o.d1),Math.abs(o.d2),o.cost)));
+scene('bal',2.2,(ctx,w,h,t)=>{
+  const narrow=w<520;const ts=Math.min(7,(t%8.5)*1.15);const k=Math.min(balSim.n,Math.round(ts/balSim.dt));
+  const L=narrow?{x:8,y:8,w:w-16,h:h*0.44}:{x:8,y:8,w:w*0.46,h:h-16};
+  const pp=phase(ctx,L,BASE.P,LEVELS,narrow?2.9:3.0);
+  const pts=balSim.xs.map((x,i)=>pp.map(x,balSim.vs[i]));
+  pp.clip();const x=balSim.xs[k],v=balSim.vs[k],V=Pa*x*x+2*Pb*x*v+Pc*v*v;
+  if(V>1e-4&&ellipsePath(ctx,BASE.P,V,pp.map)){ctx.strokeStyle=C.drift;ctx.lineWidth=2.2;ctx.stroke();}
+  polyline(ctx,pts,C.ink,1.2,.18);polyline(ctx,pts.slice(0,k+1),C.state,2.2);const p=pts[k];dot(ctx,p[0],p[1],5,C.state);ctx.restore();
+  text(ctx,'V(x) = '+fmt(V,2),L.x+10,L.y+L.h-10,{font:MONO,size:12,col:C.drift,weight:600});
+  // bars
+  const B=narrow?{x:16,y:h*0.44+34,w:w-32,h:h*0.56-44}:{x:w*0.52,y:22,w:w*0.48-20,h:h-40};
+  const vals=balVals[k];const rows=[['ドリフト項　xᵀ(AᵀP+PA)x',vals.d1,C.drift],['制御項　−2xᵀPBR⁻¹BᵀPx',vals.d2,C.ctrl],['dV/dt（上の2つの和）',vals.dv,C.ink],['コスト率　xᵀQx + uᵀRu',vals.cost,C.cost]];
+  const zx=B.x+B.w/2,half=B.w/2-6,rh=B.h/5;
+  ctx.strokeStyle=C.muted;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(zx,B.y+4);ctx.lineTo(zx,B.y+rh*4+4);ctx.stroke();
+  rows.forEach(([lab,val,col],j)=>{const yy=B.y+j*rh;text(ctx,lab,B.x,yy+14,{size:12.5,col:col,weight:700});const len=val/balMax*half;
+    ctx.fillStyle=col;ctx.globalAlpha=j===2?.85:1;ctx.fillRect(Math.min(zx,zx+len),yy+21,Math.abs(len),12);ctx.globalAlpha=1;
+    text(ctx,fmt(val,2),len>=0?zx+len+6:zx+len-6,yy+31,{font:MONO,size:11.5,col:col,align:len>=0?'left':'right',weight:600});
+    if(j===2){ctx.strokeStyle=C.line;ctx.beginPath();ctx.moveTo(B.x,yy-2);ctx.lineTo(B.x+B.w,yy-2);ctx.stroke();}});
+  const sum=vals.dv+vals.cost;text(ctx,'dV/dt + コスト率 = '+fmt(sum,3),B.x,B.y+rh*4+28,{font:MONO,size:14,col:C.cost,weight:600});
+});
+
+// ---------- 3: scalar ----------
+const fS=p=>p-p*p+1,pStar=(1+Math.sqrt(5))/2,pBad=(1-Math.sqrt(5))/2;
+const scalStarts=[0,3.3,-0.5];
+const scalSims=scalStarts.map(p0=>{const arr=[];let p=p0;const dt=0.01;for(let i=0;i<=600;i++){arr.push(p);const k1=fS(p),k2=fS(p+dt/2*k1),k3=fS(p+dt/2*k2),k4=fS(p+dt*k3);p+=dt/6*(k1+2*k2+2*k3+k4);}return arr;});
+const scalAlpha=[1,.75,.5];
+scene('scal',3,(ctx,w,h,t)=>{
+  const narrow=w<520;const tau=Math.min(6,(t%8)*1.0);const k=Math.round(tau/0.01);
+  const A=narrow?{x:40,y:14,w:w-56,h:h*0.42}:{x:40,y:14,w:w*0.5-56,h:h-52};
+  const F=frame(ctx,A,[-1.3,3.6],[-3.2,1.8],{xt:[-1,0,1,2,3],yt:[-3,-2,-1,0,1],xl:'p',yl:'f(p) = 2ap − b²p²/r + q',xfmt:v=>fmt(v,0),yfmt:v=>fmt(v,0)});
+  const cur=[];for(let i=0;i<=200;i++){const p=-1.3+i/200*4.9;cur.push(F.map(p,clamp(fS(p),-3.4,2)));}
+  ctx.save();ctx.beginPath();ctx.rect(A.x,A.y,A.w,A.h);ctx.clip();polyline(ctx,cur,C.drift,2.4);ctx.restore();
+  // flow chevrons on axis
+  [[-1.0,-1],[0.5,1],[2.7,-1]].forEach(([p,dir])=>{const [x,y]=F.map(p,0);arrow(ctx,x-dir*12,y+14,x+dir*12,y+14,C.muted,1.6);});
+  const [sx,sy]=F.map(pStar,0),[ux,uy]=F.map(pBad,0);
+  dot(ctx,sx,sy,6,C.cost);text(ctx,'p* = 1.618（安定）',sx+8,sy-10,{size:12,col:C.cost,weight:700});
+  dot(ctx,ux,uy,5.5,C.muted,true);text(ctx,'−0.618（不安定）',ux+2,uy+30,{size:11.5,col:C.muted});
+  scalSims.forEach((arr,i)=>{const p=arr[Math.min(k,arr.length-1)];const [x,y]=F.map(p,0),[,yc]=F.map(p,clamp(fS(p),-3.2,1.8));ctx.save();ctx.setLineDash([3,3]);ctx.strokeStyle=C.state;ctx.globalAlpha=scalAlpha[i];ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x,yc);ctx.stroke();ctx.restore();ctx.globalAlpha=scalAlpha[i];dot(ctx,x,y,5.5,C.state);ctx.globalAlpha=1;});
+  // time panel
+  const Bx=narrow?{x:40,y:h*0.42+50,w:w-56,h:h*0.58-90}:{x:w*0.5+40,y:14,w:w*0.5-56,h:h-52};
+  const G=frame(ctx,Bx,[0,6],[-1.3,3.6],{xt:[0,2,4,6],yt:[-1,0,1,2,3],xl:'τ = T − t（さかのぼった時間）',yl:'p(τ)',yfmt:v=>fmt(v,0)});
+  ctx.save();ctx.setLineDash([5,4]);[[pStar,C.cost],[pBad,C.muted]].forEach(([v,col])=>{ctx.strokeStyle=col;ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(Bx.x,G.my(v));ctx.lineTo(Bx.x+Bx.w,G.my(v));ctx.stroke();});ctx.restore();
+  scalSims.forEach((arr,i)=>{const pts=[];for(let j=0;j<=Math.min(k,600);j+=3)pts.push(G.map(j*0.01,arr[j]));polyline(ctx,pts,C.state,2,scalAlpha[i]);const e=pts[pts.length-1];if(e){ctx.globalAlpha=scalAlpha[i];dot(ctx,e[0],e[1],4.5,C.state);ctx.globalAlpha=1;}});
+});
+
+// ---------- 4: DRE ----------
+const Tf=6,dreDt=0.005,dre=[];{let a=0,b=0,c=0;const q1=1,q2=1,r=0.5;const F=(a,b,c)=>[q1-b*b/r,a-b*c/r,2*b-c*c/r+q2];
+  for(let i=0;i<=Tf/dreDt;i++){dre.push([a,b,c]);const k1=F(a,b,c),k2=F(a+dreDt/2*k1[0],b+dreDt/2*k1[1],c+dreDt/2*k1[2]),k3=F(a+dreDt/2*k2[0],b+dreDt/2*k2[1],c+dreDt/2*k2[2]),k4=F(a+dreDt*k3[0],b+dreDt*k3[1],c+dreDt*k3[2]);
+    a+=dreDt/6*(k1[0]+2*k2[0]+2*k3[0]+k4[0]);b+=dreDt/6*(k1[1]+2*k2[1]+2*k3[1]+k4[1]);c+=dreDt/6*(k1[2]+2*k2[2]+2*k3[2]+k4[2]);}}
+scene('dre',4.2,(ctx,w,h,t)=>{
+  const narrow=w<520;const tau=Math.min(Tf,(t%9)*0.95);const k=Math.round(tau/dreDt);const tc=Tf-tau;
+  const A=narrow?{x:40,y:14,w:w-56,h:h*0.44}:{x:40,y:14,w:w*0.58-56,h:h-52};
+  const F=frame(ctx,A,[0,Tf],[0,1.8],{xt:[0,1,2,3,4,5,6],yt:[0,0.5,1,1.5],xl:'時刻 t',yfmt:v=>fmt(v,1),zeroY:false});
+  const cols=[C.drift,C.cost,C.state],names=['p₁₁','p₁₂','p₂₂'];
+  ctx.save();ctx.setLineDash([5,4]);BASE.P.forEach((v,j)=>{ctx.strokeStyle=cols[j];ctx.globalAlpha=.5;ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(A.x,F.my(v));ctx.lineTo(A.x+A.w,F.my(v));ctx.stroke();});ctx.restore();
+  [0,1,2].forEach(j=>{const pts=[];for(let i=0;i<=k;i+=4)pts.push(F.map(Tf-i*dreDt,dre[i][j]));pts.push(F.map(tc,dre[k][j]));polyline(ctx,pts,cols[j],2.4);const e=pts[pts.length-1];dot(ctx,e[0],e[1],4.5,cols[j]);
+    text(ctx,names[j]+' → '+fmt(BASE.P[j],2),A.x+6,F.my(BASE.P[j])-5,{font:MONO,size:11,col:cols[j],weight:600});});
+  ctx.strokeStyle=C.muted;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(F.mx(tc),A.y);ctx.lineTo(F.mx(tc),A.y+A.h);ctx.stroke();
+  arrow(ctx,F.mx(Tf)-14,A.y+16,F.mx(Tf)-70,A.y+16,C.muted,1.6);text(ctx,'P(T) = 0 からさかのぼる',F.mx(Tf)-74,A.y+20,{size:11.5,col:C.muted,align:'right'});
+  // ellipse panel
+  const E=narrow?{x:16,y:h*0.44+48,w:w-32,h:h*0.56-58}:{x:w*0.6,y:14,w:w*0.4-16,h:h-74};
+  ctx.strokeStyle=C.line;ctx.strokeRect(E.x+.5,E.y+.5,E.w-1,E.h-1);
+  const s=Math.min(E.w,E.h)/2/1.6,cx=E.x+E.w/2,cy=E.y+E.h/2,map=(x,v)=>[cx+x*s,cy-v*s];
+  ctx.save();ctx.beginPath();ctx.rect(E.x,E.y,E.w,E.h);ctx.clip();
+  ctx.strokeStyle=C.muted;ctx.globalAlpha=.5;ctx.beginPath();ctx.moveTo(E.x,cy);ctx.lineTo(E.x+E.w,cy);ctx.moveTo(cx,E.y);ctx.lineTo(cx,E.y+E.h);ctx.stroke();ctx.globalAlpha=1;
+  if(ellipsePath(ctx,BASE.P,1,map)){ctx.setLineDash([5,4]);ctx.strokeStyle=C.ink;ctx.lineWidth=1.4;ctx.stroke();ctx.setLineDash([]);}
+  if(ellipsePath(ctx,dre[k],1,map)){ctx.globalAlpha=.12;ctx.fillStyle=C.drift;ctx.fill();ctx.globalAlpha=1;ctx.strokeStyle=C.drift;ctx.lineWidth=2.4;ctx.stroke();}
+  ctx.restore();
+  text(ctx,'V(x) = 1 の楕円',E.x+8,E.y+16,{size:12,col:C.muted});
+  const P=dre[k];text(ctx,'t = '+fmt(tc,2)+'   K(t) = ['+fmt(P[1]/0.5,2)+', '+fmt(P[2]/0.5,2)+']',E.x,E.y+E.h+20,{font:MONO,size:12,col:C.ink,weight:600});
+  text(ctx,'定常解 K = ['+fmt(BASE.K[0],2)+', '+fmt(BASE.K[1],2)+']（破線）',E.x,E.y+E.h+38,{font:MONO,size:11.5,col:C.muted});
+});
+
+// ---------- 5: lab ----------
+const q1El=document.getElementById('q1'),q2El=document.getElementById('q2'),rEl=document.getElementById('rr');
+let LAB=null;
+function solveLab(){const q1=Math.pow(10,+q1El.value),q2=+q2El.value,r=Math.pow(10,+rEl.value);const L=lqr(q1,q2,r);const S=sim(L.K,2,0,8,0.01);
+  const umin=Math.min(...S.us),umax=Math.max(...S.us);LAB={q1,q2,r,...L,S,uR:[Math.min(umin*1.1,-0.5),Math.max(umax*1.15,Math.abs(umin)*0.25,0.5)]};
+  document.getElementById('q1v').textContent=fmt(q1,2);document.getElementById('q2v').textContent=fmt(q2,2);document.getElementById('rrv').textContent=fmt(r,2);
+  const [a,b,c]=L.P;document.getElementById('oP').textContent=`[[${fmt(a)}, ${fmt(b)}], [${fmt(b)}, ${fmt(c)}]]`;
+  document.getElementById('oK').textContent=`[${fmt(L.K[0])}, ${fmt(L.K[1])}]`;
+  const k1=L.K[0],k2=L.K[1],disc=k2*k2-4*k1;document.getElementById('oPole').textContent=disc<0?`${fmt(-k2/2)} ± j${fmt(Math.sqrt(-disc)/2)}`:`${fmt((-k2+Math.sqrt(disc))/2)}, ${fmt((-k2-Math.sqrt(disc))/2)}`;
+  document.getElementById('oJ').textContent=fmt(a*4,3);}
+[q1El,q2El,rEl].forEach(el=>el.addEventListener('input',()=>{solveLab();render(labScene);}));
+solveLab();
+const labScene=scene('lab',8,(ctx,w,h,t)=>{
+  const narrow=w<520;const S=LAB.S;const ts=Math.min(8,(t%9.5)*1.1);const k=Math.min(S.n,Math.round(ts/S.dt));
+  const laneH=narrow?h*0.24:h*0.32;const ty=laneH-18;
+  const m=track(ctx,18,w-18,ty,[-0.4,2.4],[0,1,2]);drawCart(ctx,m(S.xs[k]),ty,S.us[k]);
+  text(ctx,'t = '+fmt(ts,1)+' s',w-14,18,{font:MONO,size:12,col:C.muted,align:'right'});
+  const top=laneH+18;
+  const A=narrow?{x:40,y:top,w:w-56,h:(h-top)/2-40}:{x:40,y:top,w:w/2-60,h:h-top-34};
+  const B=narrow?{x:40,y:top+(h-top)/2+4,w:w-56,h:(h-top)/2-40}:{x:w/2+36,y:top,w:w/2-52,h:h-top-34};
+  const plot=(box,arr,yr,col,yl)=>{const F=frame(ctx,box,[0,8],yr,{xt:[0,2,4,6,8],yt:[yr[0],0,yr[1]].filter((v,i,a)=>a.indexOf(v)===i),xl:'t [s]',yl,yfmt:v=>fmt(v,1)});
+    const pts=arr.map((v,i)=>F.map(i*S.dt,clamp(v,yr[0],yr[1])));polyline(ctx,pts,col,1.6,.25);polyline(ctx,pts.slice(0,k+1),col,2.4);const e=pts[k];dot(ctx,e[0],e[1],4.5,col);};
+  plot(A,S.xs,[-0.4,2.2],C.state,'位置 x(t) [m]');plot(B,S.us,LAB.uR,C.ctrl,'入力 u(t)');
+});
+
+requestAnimationFrame(loop);
+})();
+</script>
