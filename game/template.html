@@ -95,7 +95,7 @@ canvas#next { width: 100%; display: block; background: var(--screen-grid); borde
 
 .help { width: min(440px, 100%); font-size: 12.5px; color: var(--muted); line-height: 1.7; display: grid; gap: 10px; }
 .help kbd { font-family: var(--display); background: var(--bg-2); border: 1px solid #333a47; border-radius: 4px; padding: 0 5px; color: var(--fg); }
-.roster { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.roster { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
 .roster figure { margin: 0; display: grid; justify-items: center; gap: 2px; font-size: 10.5px; text-align: center; }
 .roster img { width: 100%; max-width: 64px; aspect-ratio: 1; border-radius: 10px; padding: 4px; box-sizing: border-box; }
 @media (prefers-reduced-motion: reduce) { .key, .start { transition: none; } }
@@ -146,11 +146,14 @@ canvas#next { width: 100%; display: block; background: var(--screen-grid); borde
 <script>
 const ICONS = /*ICONS*/null;
 const TYPES = [
-  { key: 'fire',  name: 'FIRE',      tile: '#e5484d' },
-  { key: 'stick', name: 'StickC',    tile: '#f2b533' },
-  { key: 'mp135', name: 'CoreMP135', tile: '#3b82f6' },
-  { key: 'core2', name: 'Core2',     tile: '#2fb37f' },
-  { key: 'basic', name: 'Basic',     tile: '#9a6cf0' },
+  { key: 'basic',  name: 'Basic',     tile: '#9a6cf0' },
+  { key: 'fire',   name: 'FIRE',      tile: '#e5484d' },
+  { key: 'core2',  name: 'Core2',     tile: '#2fb37f' },
+  { key: 'cores3', name: 'CoreS3',    tile: '#1fb5c9' },
+  { key: 'atoms3', name: 'AtomS3',    tile: '#6b7a90' },
+  { key: 'stick',  name: 'StickC',    tile: '#f2b533' },
+  { key: 'sticks3',name: 'StickS3',   tile: '#e8589f' },
+  { key: 'mp135',  name: 'CoreMP135', tile: '#3b82f6' },
 ];
 const W = 6, H = 13; // row 0 is the hidden spawn row
 const CHAIN_POWER = [0, 8, 16, 32, 64, 96, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448, 480, 512];
@@ -506,7 +509,7 @@ function beep(n) {
 function boot() {
   S = fresh();
   // demo board on the title screen so the first frame shows the game
-  const demo = ['......', '......', '......', '......', '......', '......', '......', '......', '.0....', '01.3..', '0123.4', '212344'];
+  const demo = ['......', '......', '......', '......', '......', '......', '......', '......', '.5....', '56.3..', '5713.4', '217344'];
   demo.forEach((row, i) => [...row].forEach((ch, x) => { if (ch !== '.') S.grid[i + 1][x] = cell(+ch); }));
   resize(); requestAnimationFrame(frame);
 }
