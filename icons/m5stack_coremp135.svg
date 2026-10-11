@@ -29,9 +29,10 @@
   <rect x="96" y="96" width="320" height="320" rx="30" fill="#1e88e5"/>
   <rect x="112" y="112" width="288" height="288" rx="20" fill="#111"/>
   <rect x="136" y="132" width="240" height="180" rx="6" fill="url(#scr)"/>
-  <circle cx="209.2" cy="208.0" r="9.4" fill="#fff"/>
-  <circle cx="302.8" cy="208.0" r="9.4" fill="#fff"/>
-  <rect x="224.2" y="241.7" width="63.6" height="6.6" fill="#fff"/>
+  <path d="M195.2 208.0 Q209.2 216.4 223.2 208.0" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.6"/>
+  <path d="M288.8 208.0 Q302.8 216.4 316.8 208.0" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.6"/>
+  <path d="M242.0 245.4 Q256.0 254.8 270.0 245.4" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.6"/>
+  <path d="M319.2 168.2 h14.0 l-14.0 14.0 h14.0" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.9"/>
   <circle cx="226" cy="364" r="5" fill="#3a3a3a" stroke="#666" stroke-width="2"/>
   <circle cx="286" cy="364" r="5" fill="#3a3a3a" stroke="#666" stroke-width="2"/>
   <rect x="112" y="112" width="288" height="288" rx="20" fill="url(#glare)"/>

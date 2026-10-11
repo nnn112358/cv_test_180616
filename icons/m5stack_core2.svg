@@ -18,15 +18,15 @@
   </defs>
   <rect x="74" y="146" width="22" height="56" rx="6" fill="none" stroke="#2b2b2b" stroke-width="22" stroke-linejoin="round"/>
   <rect x="74" y="146" width="22" height="56" rx="6" fill="none" stroke="#fff" stroke-width="16" stroke-linejoin="round"/>
-  <rect x="74" y="146" width="22" height="56" rx="6" fill="#222"/>
+  <rect x="74" y="146" width="22" height="56" rx="6" fill="#f2f2f2"/>
   <rect x="96" y="96" width="320" height="320" rx="30" fill="none" stroke="#2b2b2b" stroke-width="22" stroke-linejoin="round"/>
   <rect x="96" y="96" width="320" height="320" rx="30" fill="none" stroke="#fff" stroke-width="16" stroke-linejoin="round"/>
   <rect x="96" y="96" width="320" height="320" rx="30" fill="#f2f2f2"/>
   <rect x="110" y="110" width="292" height="292" rx="20" fill="#111"/>
   <rect x="136" y="132" width="240" height="180" rx="6" fill="url(#scr)"/>
   <circle cx="209.2" cy="208.0" r="9.4" fill="#fff"/>
-  <circle cx="302.8" cy="208.0" r="9.4" fill="#fff"/>
-  <rect x="224.2" y="241.7" width="63.6" height="6.6" fill="#fff"/>
+  <path d="M288.8 199.5 L314.5 208.0 L288.8 216.4" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.6"/>
+  <path d="M230.3 240.7 Q256.0 261.8 281.7 240.7" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.6"/>
   <rect x="110" y="110" width="292" height="292" rx="20" fill="url(#glare)"/>
   <circle cx="176" cy="368" r="7" fill="none" stroke="#e04848" stroke-width="3.5"/>
   <circle cx="256" cy="368" r="7" fill="none" stroke="#e04848" stroke-width="3.5"/>

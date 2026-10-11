@@ -19,10 +19,10 @@
   <g transform="translate(16 8) scale(0.82)">
   <rect x="82" y="114" width="22" height="56" rx="6" fill="none" stroke="#2b2b2b" stroke-width="22" stroke-linejoin="round"/>
   <rect x="82" y="114" width="22" height="56" rx="6" fill="none" stroke="#fff" stroke-width="16" stroke-linejoin="round"/>
-  <rect x="82" y="114" width="22" height="56" rx="6" fill="#222"/>
+  <rect x="82" y="114" width="22" height="56" rx="6" fill="#e0473f"/>
   <rect x="96" y="258" width="320" height="150" rx="26" fill="none" stroke="#2b2b2b" stroke-width="22" stroke-linejoin="round"/>
   <rect x="96" y="258" width="320" height="150" rx="26" fill="none" stroke="#fff" stroke-width="16" stroke-linejoin="round"/>
-  <rect x="96" y="258" width="320" height="150" rx="26" fill="#f2f2f2"/>
+  <rect x="96" y="258" width="320" height="150" rx="26" fill="#b0b0b0"/>
   <rect x="100" y="340.0" width="12" height="8.8" rx="3" fill="#ff4d4d"/>
   <rect x="400" y="340.0" width="12" height="8.8" rx="3" fill="#4db8ff"/>
   <rect x="100" y="352.8" width="12" height="8.8" rx="3" fill="#ffb02e"/>
@@ -38,9 +38,9 @@
   <rect x="104" y="64" width="304" height="304" rx="30" fill="#f2f2f2"/>
   <rect x="118" y="78" width="276" height="276" rx="20" fill="#111"/>
   <rect x="144" y="100" width="224" height="168" rx="6" fill="url(#scr)"/>
-  <circle cx="212.3" cy="170.9" r="8.7" fill="#fff"/>
-  <circle cx="299.7" cy="170.9" r="8.7" fill="#fff"/>
-  <rect x="226.3" y="202.3" width="59.4" height="6.1" fill="#fff"/>
+  <path d="M199.2 176.1 L212.3 162.2 L225.4 176.1" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.1"/>
+  <path d="M286.6 176.1 L299.7 162.2 L312.8 176.1" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.1"/>
+  <path d="M229.8 201.5 Q256.0 223.3 282.2 201.5" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.1"/>
   <rect x="148" y="300" width="64" height="28" rx="5" fill="url(#whitebtn)"/>
   <rect x="232" y="300" width="64" height="28" rx="5" fill="url(#whitebtn)"/>
   <rect x="316" y="300" width="64" height="28" rx="5" fill="url(#whitebtn)"/>
