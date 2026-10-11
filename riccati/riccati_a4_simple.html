@@ -1,0 +1,171 @@
+<!doctype html><html lang="ja" data-theme="light"><head><meta charset="utf-8"><title>動くリッカチ方程式</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@600;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&family=STIX+Two+Text:ital,wght@0,400;1,400;1,600&display=swap">
+<style>
+/* Layout: one reading column (textbook page), each section = short prose + one live figure; equation terms carry a fixed color code across all figures */
+:root{
+  --bg:#f2f4f6; --surface:#ffffff; --ink:#172230; --muted:#5b6977; --line:#d3dae2; --grid:#e6ebf0;
+  --drift:#2d58cf; --ctrl:#c8741f; --cost:#14897b; --state:#b2385c;
+  --f-display:"Shippori Mincho B1","Hiragino Mincho ProN","Yu Mincho",serif;
+  --f-body:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",monospace;
+  --f-math:"STIX Two Text","Times New Roman",serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e141b; --surface:#151e28; --ink:#e4ebf2; --muted:#95a4b4; --line:#2a3846; --grid:#1d2834;
+  --drift:#7f9dff; --ctrl:#efa556; --cost:#3cc6b2; --state:#ff7b9f; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e141b; --surface:#151e28; --ink:#e4ebf2; --muted:#95a4b4; --line:#2a3846; --grid:#1d2834;
+  --drift:#7f9dff; --ctrl:#efa556; --cost:#3cc6b2; --state:#ff7b9f; color-scheme:dark}
+
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body)}
+.page{width:1920px;height:1358px;box-sizing:border-box;padding:40px 48px 30px;display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:26px}
+header{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:40px}
+.eyebrow{font-size:17px;letter-spacing:.16em;color:var(--muted);font-weight:500}
+h1{font-family:var(--f-display);font-weight:800;font-size:80px;line-height:1.05;margin:6px 0 0;letter-spacing:.03em}
+.sub{font-size:20px;line-height:1.75;margin-top:12px;max-width:48em}
+.eq{font-family:var(--f-math);font-size:50px;white-space:nowrap;text-align:right}
+.eq .term{display:inline-block;padding:0 .1em;border-bottom:4px solid currentColor}
+.legend{display:flex;gap:24px;justify-content:flex-end;font-size:16px;margin-top:10px}
+.legend span::before{content:"";display:inline-block;width:16px;height:4px;border-radius:2px;background:currentColor;margin-right:7px;vertical-align:middle}
+.t-drift{color:var(--drift)}.t-ctrl{color:var(--ctrl)}.t-cost{color:var(--cost)}
+.m{font-family:var(--f-math);font-style:italic;white-space:nowrap}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:26px;min-height:0}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px 26px 18px;display:grid;grid-template-rows:auto auto minmax(0,1fr);gap:8px;min-height:0}
+.panel h2{margin:0;font-family:var(--f-display);font-weight:800;font-size:34px;line-height:1.3;display:flex;gap:16px;align-items:baseline}
+.panel h2 b{font-size:44px;color:var(--muted)}
+.panel p{margin:0;font-size:18px;line-height:1.65;color:var(--muted)}
+canvas{display:block;width:100%;height:100%;min-height:0}
+footer{font-size:14px;color:var(--muted)}
+</style></head><body><div class="page">
+<header><div><div class="eyebrow">制御工学 ・ 最適制御（LQR）</div><h1>リッカチ方程式</h1>
+<div class="sub">台車を原点に戻すとき、ずれと力のコスト <span class="m">J = ∫(xᵀQx + uᵀRu)dt</span> を最小にしたい。最小コストは <span class="m">V(x) = xᵀPx</span> という「お椀」の形をしていて、そのお椀の形 <span class="m">P</span> を決めるのがリッカチ方程式です。</div></div>
+<div><div class="eq"><span class="term t-drift">AᵀP + PA</span> <span class="term t-ctrl">− PBR⁻¹BᵀP</span> <span class="term t-cost">+ Q</span> = 0</div>
+<div class="legend"><span class="t-drift">放っておいたときの変化</span><span class="t-ctrl">制御で減らせる分</span><span class="t-cost">払うコスト</span></div></div></header>
+<div class="grid">
+<div class="panel"><h2><b>1</b>お椀の形 P を、時間をさかのぼって求める</h2><p>終わりの時刻から逆向きに <span class="m">−Ṗ = AᵀP + PA − PBR⁻¹BᵀP + Q</span> を解くと、<span class="m">P</span> は一定値に落ち着く。</p><canvas id="c1"></canvas></div>
+<div class="panel"><h2><b>2</b>お椀を下るのが最適制御</h2><p>力は <span class="m">u = −Kx</span>（<span class="m">K = R⁻¹BᵀP</span>）。下る速さと払うコストが常に釣り合う。それがリッカチ方程式の意味。</p><canvas id="c2"></canvas></div>
+</div>
+<span aria-hidden="true" style="position:absolute;opacity:0;font-family:var(--f-mono);font-weight:600">0<b style="font-weight:400">0</b></span><footer>例：台車（2重積分器）A = [[0, 1], [0, 0]], B = [0, 1]ᵀ, Q = diag(1, 1), R = 0.5。図の数値はすべて式から計算（RK4）。</footer>
+</div><script>
+(() => {
+const root=document.documentElement;const C={};
+['bg','surface','ink','muted','line','grid','drift','ctrl','cost','state'].forEach(k=>C[k]=getComputedStyle(root).getPropertyValue('--'+k).trim());
+const UI='"Zen Kaku Gothic New","Hiragino Sans",sans-serif', MONO='"IBM Plex Mono",ui-monospace,monospace';
+const fmt=(n,d=2)=>(Math.abs(n)<0.5*Math.pow(10,-d)?0:n).toFixed(d).replace('-','−');
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+// ---------- math ----------
+function lqr(q1,q2,r){const b=Math.sqrt(q1*r);const c=Math.sqrt(r*(2*b+q2));return {P:[b*c/r,b,c],K:[b/r,c/r]};}
+function sim(K,x0,v0,T,dt){const xs=[],vs=[],us=[];let x=x0,v=v0;const n=Math.round(T/dt);
+  const f=(x,v)=>[v,-(K[0]*x+K[1]*v)];
+  for(let i=0;i<=n;i++){xs.push(x);vs.push(v);us.push(-(K[0]*x+K[1]*v));
+    const k1=f(x,v),k2=f(x+dt/2*k1[0],v+dt/2*k1[1]),k3=f(x+dt/2*k2[0],v+dt/2*k2[1]),k4=f(x+dt*k3[0],v+dt*k3[1]);
+    x+=dt/6*(k1[0]+2*k2[0]+2*k3[0]+k4[0]);v+=dt/6*(k1[1]+2*k2[1]+2*k3[1]+k4[1]);}
+  return {xs,vs,us,dt,n};}
+function ellipsePath(ctx,P,L,map){const [a,b,c]=P;const m=(a+c)/2,d=Math.sqrt(((a-c)/2)**2+b*b);const l1=m+d,l2=m-d;if(l2<=1e-6)return false;
+  const th=0.5*Math.atan2(2*b,a-c),r1=Math.sqrt(L/l1),r2=Math.sqrt(L/l2);ctx.beginPath();
+  for(let i=0;i<=120;i++){const t=i/120*2*Math.PI,ex=r1*Math.cos(t),ey=r2*Math.sin(t);const [px,py]=map(ex*Math.cos(th)-ey*Math.sin(th),ex*Math.sin(th)+ey*Math.cos(th));i?ctx.lineTo(px,py):ctx.moveTo(px,py);}
+  ctx.closePath();return true;}
+
+// ---------- drawing helpers ----------
+function arrow(ctx,x0,y0,x1,y1,col,w=2.5){const ang=Math.atan2(y1-y0,x1-x0),len=Math.hypot(x1-x0,y1-y0);if(len<2)return;ctx.strokeStyle=col;ctx.fillStyle=col;ctx.lineWidth=w;ctx.beginPath();ctx.moveTo(x0,y0);ctx.lineTo(x1-Math.cos(ang)*7,y1-Math.sin(ang)*7);ctx.stroke();ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x1-Math.cos(ang-0.45)*10,y1-Math.sin(ang-0.45)*10);ctx.lineTo(x1-Math.cos(ang+0.45)*10,y1-Math.sin(ang+0.45)*10);ctx.closePath();ctx.fill();}
+function text(ctx,s,x,y,{font=UI,size=13,col=C.ink,align='left',base='alphabetic',weight=400}={}){ctx.font=`${weight} ${size}px ${font}`;ctx.fillStyle=col;ctx.textAlign=align;ctx.textBaseline=base;ctx.fillText(s,x,y);}
+function polyline(ctx,pts,col,w=2,alpha=1,dash=null){if(pts.length<2)return;ctx.save();ctx.globalAlpha=alpha;ctx.strokeStyle=col;ctx.lineWidth=w;ctx.lineJoin='round';ctx.lineCap='round';if(dash)ctx.setLineDash(dash);ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.stroke();ctx.restore();}
+function dot(ctx,x,y,r,col,hollow=false){ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);if(hollow){ctx.fillStyle=C.surface;ctx.fill();ctx.strokeStyle=col;ctx.lineWidth=2;ctx.stroke();}else{ctx.fillStyle=col;ctx.fill();}}
+// plot frame: box {x,y,w,h}, ranges -> mapper
+function frame(ctx,box,xr,yr,{xt=[],yt=[],xl='',yl='',zeroY=true,xfmt=v=>fmt(v,0),yfmt=v=>fmt(v,1)}={}){
+  const mx=v=>box.x+(v-xr[0])/(xr[1]-xr[0])*box.w, my=v=>box.y+box.h-(v-yr[0])/(yr[1]-yr[0])*box.h;
+  ctx.lineWidth=1;ctx.strokeStyle=C.grid;
+  xt.forEach(v=>{ctx.beginPath();ctx.moveTo(mx(v),box.y);ctx.lineTo(mx(v),box.y+box.h);ctx.stroke();text(ctx,xfmt(v),mx(v),box.y+box.h+14,{font:MONO,size:10.5,col:C.muted,align:'center'});});
+  yt.forEach(v=>{ctx.beginPath();ctx.moveTo(box.x,my(v));ctx.lineTo(box.x+box.w,my(v));ctx.stroke();text(ctx,yfmt(v),box.x-5,my(v)+3.5,{font:MONO,size:10.5,col:C.muted,align:'right'});});
+  ctx.strokeStyle=C.line;ctx.strokeRect(box.x+.5,box.y+.5,box.w-1,box.h-1);
+  if(zeroY&&yr[0]<0&&yr[1]>0){ctx.strokeStyle=C.muted;ctx.globalAlpha=.6;ctx.beginPath();ctx.moveTo(box.x,my(0));ctx.lineTo(box.x+box.w,my(0));ctx.stroke();ctx.globalAlpha=1;}
+  if(xl)text(ctx,xl,box.x+box.w,box.y+box.h+28,{size:12,col:C.muted,align:'right'});
+  if(yl)text(ctx,yl,box.x+6,box.y+15,{size:12,col:C.muted});
+  return {mx,my,map:(a,b)=>[mx(a),my(b)]};}
+// phase plane with equal scaling, returns mapper
+function phase(ctx,box,P,levels,halfX){const s=box.w/(2*halfX),cx=box.x+box.w/2,cy=box.y+box.h/2;const map=(x,v)=>[cx+x*s,cy-v*s];
+  ctx.save();ctx.beginPath();ctx.rect(box.x,box.y,box.w,box.h);ctx.clip();
+  for(let i=levels.length-1;i>=0;i--){if(ellipsePath(ctx,P,levels[i],map)){ctx.globalAlpha=.05;ctx.fillStyle=C.drift;ctx.fill();ctx.globalAlpha=.35;ctx.strokeStyle=C.drift;ctx.lineWidth=1;ctx.stroke();ctx.globalAlpha=1;}}
+  ctx.strokeStyle=C.muted;ctx.globalAlpha=.55;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(box.x,cy);ctx.lineTo(box.x+box.w,cy);ctx.moveTo(cx,box.y);ctx.lineTo(cx,box.y+box.h);ctx.stroke();ctx.globalAlpha=1;
+  ctx.restore();
+  text(ctx,'x（位置）',box.x+box.w-4,cy-6,{size:12,col:C.muted,align:'right'});
+  text(ctx,'v（速度）',cx+6,box.y+14,{size:12,col:C.muted});
+  return {map,s,clip(){ctx.save();ctx.beginPath();ctx.rect(box.x,box.y,box.w,box.h);ctx.clip();}};}
+
+
+const SC=1.35, scenes=[];
+function scene(id,draw){const el=document.getElementById(id),ctx=el.getContext('2d');const r=el.getBoundingClientRect();el.width=Math.round(r.width);el.height=Math.round(r.height);scenes.push({ctx,w:r.width/SC,h:r.height/SC,el,draw});}
+window.renderAt=t=>scenes.forEach(s=>{s.ctx.setTransform(1,0,0,1,0,0);s.ctx.clearRect(0,0,s.el.width,s.el.height);s.ctx.setTransform(SC,0,0,SC,0,0);s.draw(s.ctx,s.w,s.h,t);});
+
+const q1=1,q2=1,R=0.5,BASE=lqr(q1,q2,R),LEVELS=[0.5,1.5,3,5,7.5,10.5,14];
+
+// ---- 1: backward Riccati ----
+const Tf=6,dt=0.005,dre=[];{let a=0,b=0,c=0;const F=(a,b,c)=>[q1-b*b/R,a-b*c/R,2*b-c*c/R+q2];
+ for(let i=0;i<=Tf/dt;i++){dre.push([a,b,c]);const k1=F(a,b,c),k2=F(a+dt/2*k1[0],b+dt/2*k1[1],c+dt/2*k1[2]),k3=F(a+dt/2*k2[0],b+dt/2*k2[1],c+dt/2*k2[2]),k4=F(a+dt*k3[0],b+dt*k3[1],c+dt*k3[2]);
+  a+=dt/6*(k1[0]+2*k2[0]+2*k3[0]+k4[0]);b+=dt/6*(k1[1]+2*k2[1]+2*k3[1]+k4[1]);c+=dt/6*(k1[2]+2*k2[2]+2*k3[2]+k4[2]);}}
+scene('c1',(ctx,w,h,t)=>{
+ const tau=Math.min(Tf,(t%10)*0.8),k=Math.round(tau/dt),tc=Tf-tau,P=dre[k];
+ const A={x:44,y:12,w:w-58,h:h*0.46};
+ const F=frame(ctx,A,[0,Tf],[0,1.8],{xt:[0,1,2,3,4,5,6],yt:[0,0.5,1,1.5],xl:'時刻 t',yfmt:v=>fmt(v,1),zeroY:false});
+ const cols=[C.drift,C.cost,C.state],names=['p₁₁','p₁₂','p₂₂'];
+ ctx.save();ctx.setLineDash([5,4]);BASE.P.forEach((v,j)=>{ctx.strokeStyle=cols[j];ctx.globalAlpha=.45;ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(A.x,F.my(v));ctx.lineTo(A.x+A.w,F.my(v));ctx.stroke();});ctx.restore();
+ [0,1,2].forEach(j=>{const pts=[];for(let i=0;i<=k;i+=4)pts.push(F.map(Tf-i*dt,dre[i][j]));pts.push(F.map(tc,dre[k][j]));polyline(ctx,pts,cols[j],2.6);const e=pts[pts.length-1];dot(ctx,e[0],e[1],4.5,cols[j]);
+  text(ctx,names[j],A.x+8,F.my(BASE.P[j])-5,{font:MONO,size:12,col:cols[j],weight:600});});
+ ctx.strokeStyle=C.muted;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(F.mx(tc),A.y);ctx.lineTo(F.mx(tc),A.y+A.h);ctx.stroke();
+ arrow(ctx,F.mx(Tf)-12,A.y+18,F.mx(Tf)-64,A.y+18,C.muted,1.6);text(ctx,'P(T) = 0 からさかのぼる',F.mx(Tf)-70,A.y+22,{size:12.5,col:C.muted,align:'right'});
+ // bowl
+ const top=A.y+A.h+50,side=Math.min(h-top-8,w*0.48),E={x:16,y:top,w:side,h:side};
+ ctx.strokeStyle=C.line;ctx.strokeRect(E.x+.5,E.y+.5,E.w-1,E.h-1);
+ const s=side/2/1.7,cx=E.x+side/2,cy=E.y+side/2,map=(x,v)=>[cx+x*s,cy-v*s];
+ ctx.save();ctx.beginPath();ctx.rect(E.x,E.y,E.w,E.h);ctx.clip();
+ ctx.strokeStyle=C.muted;ctx.globalAlpha=.5;ctx.beginPath();ctx.moveTo(E.x,cy);ctx.lineTo(E.x+E.w,cy);ctx.moveTo(cx,E.y);ctx.lineTo(cx,E.y+E.h);ctx.stroke();ctx.globalAlpha=1;
+ if(ellipsePath(ctx,BASE.P,1,map)){ctx.setLineDash([5,4]);ctx.strokeStyle=C.ink;ctx.lineWidth=1.4;ctx.stroke();ctx.setLineDash([]);}
+ [1,2.5,4.5].forEach((L,i)=>{if(ellipsePath(ctx,P,L,map)){ctx.globalAlpha=.07;ctx.fillStyle=C.drift;ctx.fill();ctx.globalAlpha=i?0.45:1;ctx.strokeStyle=C.drift;ctx.lineWidth=i?1.2:2.6;ctx.stroke();ctx.globalAlpha=1;}});
+ ctx.restore();
+ text(ctx,'お椀 V(x) = xᵀPx の等高線',E.x+8,E.y+18,{size:12.5,col:C.muted});
+ const tx=E.x+side+22;let ty=top+22;
+ text(ctx,'t = '+fmt(tc,2),tx,ty,{font:MONO,size:15,col:C.ink,weight:600});ty+=30;
+ text(ctx,'P = ['+fmt(P[0])+', '+fmt(P[1]),tx,ty,{font:MONO,size:14,col:C.drift});ty+=20;text(ctx,'     '+fmt(P[1])+', '+fmt(P[2])+']',tx,ty,{font:MONO,size:14,col:C.drift});ty+=30;
+ text(ctx,'K = R⁻¹BᵀP = ['+fmt(P[1]/R)+', '+fmt(P[2]/R)+']',tx,ty,{font:MONO,size:14,col:C.ink});ty+=40;
+ const done=clamp((tau-5)/0.8,0,1);ctx.globalAlpha=0.25+0.75*done;
+ text(ctx,'さかのぼるほど P は一定値へ',tx,ty,{size:15,col:C.cost,weight:700});ty+=24;
+ text(ctx,'→ その値が リッカチ方程式の解',tx,ty,{size:15,col:C.cost,weight:700});ty+=22;
+ text(ctx,'（破線：定常解のお椀）',tx,ty,{size:12.5,col:C.muted});ctx.globalAlpha=1;
+});
+
+// ---- 2: descending the bowl ----
+const S=sim(BASE.K,2.5,0,8,0.01),[Pa,Pb,Pc]=BASE.P;
+const vals=S.xs.map((x,i)=>{const v=S.vs[i],s=Pb*x+Pc*v;return {V:Pa*x*x+2*Pb*x*v+Pc*v*v,down:-(2*(Pa*x*v+Pb*v*v)-2*s*s/R),cost:q1*x*x+q2*v*v+s*s/R};});
+const vmax=Math.max(...vals.map(o=>o.cost));
+scene('c2',(ctx,w,h,t)=>{
+ const ts=Math.min(6,(t%10)*0.7),k=Math.min(S.n,Math.round(ts/S.dt)),x=S.xs[k],u=S.us[k];
+ // cart
+ const ty=h*0.2,m=v=>20+(v+0.6)/3.6*(w-40);
+ ctx.strokeStyle=C.line;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(20,ty);ctx.lineTo(w-20,ty);ctx.stroke();
+ [0,1,2,3].forEach(v=>text(ctx,v+' m',m(v),ty+17,{font:MONO,size:11,col:C.muted,align:'center'}));
+ ctx.save();ctx.setLineDash([4,4]);ctx.strokeStyle=C.cost;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(m(0),ty-90);ctx.lineTo(m(0),ty);ctx.stroke();ctx.restore();
+ text(ctx,'目標',m(0)-6,ty-78,{size:12,col:C.cost,weight:700,align:'right'});
+ const cx=m(x);ctx.fillStyle=C.surface;ctx.strokeStyle=C.ink;ctx.lineWidth=1.6;ctx.beginPath();ctx.roundRect(cx-24,ty-34,48,26,4);ctx.fill();ctx.stroke();dot(ctx,cx-13,ty-6,4.5,C.ink);dot(ctx,cx+13,ty-6,4.5,C.ink);
+ const L=clamp(u*14,-140,140);if(Math.abs(L)>2)arrow(ctx,cx,ty-21,cx+L,ty-21,C.ctrl,3);
+ text(ctx,'力 u = −Kx = '+fmt(u,2),cx+L/2,ty-46,{font:MONO,size:12,col:C.ctrl,align:'center',weight:600});
+ text(ctx,'t = '+fmt(ts,1)+' s',w-16,18,{font:MONO,size:13,col:C.muted,align:'right'});
+ // phase plane
+ const B={x:12,y:h*0.27,w:w*0.58,h:h*0.71};const pp=phase(ctx,B,BASE.P,LEVELS,3.1);
+ const pts=S.xs.map((xx,i)=>pp.map(xx,S.vs[i]));pp.clip();
+ const o=vals[k];if(o.V>1e-4&&ellipsePath(ctx,BASE.P,o.V,pp.map)){ctx.strokeStyle=C.drift;ctx.lineWidth=2.4;ctx.stroke();}
+ polyline(ctx,pts,C.ink,1.2,.18);polyline(ctx,pts.slice(0,k+1),C.state,2.6);const p=pts[k];dot(ctx,p[0],p[1],6,C.state);ctx.restore();
+ text(ctx,'V(x) = '+fmt(o.V,2),B.x+10,B.y+B.h-10,{font:MONO,size:13,col:C.drift,weight:600});
+ // bars
+ const bx=w*0.64,bw=w-bx-14,base=B.y+B.h-70,bh=B.h*0.62,colW=bw*0.3;
+ const bars=[['お椀を下る速さ','−dV/dt',o.down,C.drift],['払うコスト率','xᵀQx + uᵀRu',o.cost,C.cost]];
+ bars.forEach(([l1,l2,val,col],j)=>{const x0=bx+j*(bw/2)+bw/4-colW/2,H=val/vmax*bh;ctx.fillStyle=C.grid;ctx.fillRect(x0,base-bh,colW,bh);ctx.fillStyle=col;ctx.fillRect(x0,base-H,colW,H);
+  text(ctx,fmt(val,2),x0+colW/2,base-H-8,{font:MONO,size:13,col,align:'center',weight:600});
+  text(ctx,l1,x0+colW/2,base+20,{size:13,col,align:'center',weight:700});text(ctx,l2,x0+colW/2,base+38,{size:12,col:C.muted,align:'center'});});
+ text(ctx,'2本はいつも同じ高さ',bx+bw/2,B.y+12,{size:15,col:C.ink,align:'center',weight:700});
+ text(ctx,'＝ リッカチ方程式が成り立っている',bx+bw/2,B.y+32,{size:13,col:C.muted,align:'center'});
+});
+window.__ready=true;
+})();
+</script></body></html>
